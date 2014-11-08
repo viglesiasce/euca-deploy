@@ -3,6 +3,7 @@ import json
 from os.path import splitext
 import os
 import tempfile
+import shutil
 
 from fabric.api import *
 from fabric.colors import *
@@ -44,7 +45,7 @@ def translate_config():
     filename = 'environments/' + current_environment + '.json'
     with tempfile.NamedTemporaryFile(delete=False) as tmp_handle:
         tmp_handle.write(json.dumps(config_dict, indent=4, sort_keys=True, separators=(',', ': ')))
-        os.rename(tmp_handle.name, filename)
+        shutil.copy(tmp_handle.name, filename)
     return current_environment
 
 
@@ -83,7 +84,7 @@ def write_node_hash(node_name):
     filename = 'nodes/' + node_name + '.json'
     with tempfile.NamedTemporaryFile(delete=False) as tmp_handle:
         tmp_handle.write(json.dumps(node_hash[node_name], indent=4, sort_keys=True, separators=(',', ': ')))
-        os.rename(tmp_handle.name, filename)
+        shutil.copy(tmp_handle.name, filename)
 
 
 def get_node_name_by_ip(target_address):
