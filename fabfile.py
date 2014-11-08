@@ -138,12 +138,13 @@ def push_configuration(remote_chef_tarball_path="/root/euca-deploy/", chef_repo_
     """Push deployment data from localhost to Eucalyptus Machines"""
     if local('hostname', capture=True) != run('hostname'):
         chef_repo_tarball = 'chef-repo.tgz'
-        execute(create_repo_tarball)
-        run('rm -rf ' + remote_chef_tarball_path + 'chef-repo')
-        run('mkdir -p ' + remote_chef_tarball_path)
-        put(chef_repo_tarball, remote_path=remote_chef_tarball_path)
-        with cd(remote_chef_tarball_path):
-            run('tar xzfv ' + chef_repo_tarball)
+        with hide("everything"):
+            execute(create_repo_tarball)
+            run('rm -rf ' + remote_chef_tarball_path + 'chef-repo')
+            run('mkdir -p ' + remote_chef_tarball_path)
+            put(chef_repo_tarball, remote_path=remote_chef_tarball_path)
+            with cd(remote_chef_tarball_path):
+                run('tar xzfv ' + chef_repo_tarball)
 
 
 @task
