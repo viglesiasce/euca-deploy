@@ -133,7 +133,7 @@ def create_repo_tarball(chef_repo_dir='chef-repo/'):
 
 @roles('all')
 @task
-@serial
+@parallel
 def push_configuration(remote_chef_tarball_path="/root/euca-deploy/", chef_repo_dir='chef-repo/'):
     """Push deployment data from localhost to Eucalyptus Machines"""
     if local('hostname', capture=True) != run('hostname'):
