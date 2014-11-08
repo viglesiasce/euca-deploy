@@ -43,9 +43,8 @@ def translate_config():
     config_dict = yaml.load(open('config.yml').read())
     current_environment = config_dict['name']
     filename = 'environments/' + current_environment + '.json'
-    with tempfile.NamedTemporaryFile(delete=False) as tmp_handle:
-        tmp_handle.write(json.dumps(config_dict, indent=4, sort_keys=True, separators=(',', ': ')))
-        shutil.copy(tmp_handle.name, filename)
+    with open(filename, 'w') as env_json:
+        env_json.write(json.dumps(config_dict, indent=4, sort_keys=True, separators=(',', ': ')))
     return current_environment
 
 
@@ -81,10 +80,9 @@ def read_node_hash(node_file):
 @task
 @serial
 def write_node_hash(node_name):
-    filename = 'nodes/' + node_name + '.json'
-    with tempfile.NamedTemporaryFile(delete=False) as tmp_handle:
-        tmp_handle.write(json.dumps(node_hash[node_name], indent=4, sort_keys=True, separators=(',', ': ')))
-        shutil.copy(tmp_handle.name, filename)
+    node_json = 'nodes/' + node_name + '.json'
+    with open(node_json, 'w') as env_json:
+        env_json.write(json.dumps(node_hash[node_name], indent=4, sort_keys=True, separators=(',', ': ')))
 
 
 def get_node_name_by_ip(target_address):
