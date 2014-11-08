@@ -11,18 +11,18 @@ import yaml
 env.user = 'root'
 env.pool_size = 72
 
-
 node_hash = {}
 output['stdout'] = True
 output['status'] = True
 output['running'] = True
 
-
 __all__ = ['full_install', 'push_configuration', 'clc', 'frontends', 'midtier',
            'nodes', 'configure', 'midolmen', 'midonet_gw', 'sync_ssh_key', 'uninstall']
 
+
 class FailedToFindNodeException(Exception):
     pass
+
 
 def error(message):
     print red(message)
@@ -63,17 +63,20 @@ def compile_fabric_roles(current_environment, chef_repo_dir='chef-repo'):
 environment_name = translate_config()
 compile_fabric_roles(environment_name)
 
+
 def load_local_node_info(chef_repo_dir='chef-repo/'):
     for node_file in glob.glob(chef_repo_dir + 'nodes/*.json'):
         read_node_hash(node_file)
+
 
 def read_node_hash(node_file):
     with open(node_file) as handle:
         try:
             data = handle.read()
             node_hash[splitext(node_file.split('/')[-1])[0]] = json.loads(data)
-        except ValueError, e:
+        except ValueError:
             pass
+
 
 @task
 @serial
@@ -146,7 +149,7 @@ def push_configuration(remote_chef_tarball_path="/root/euca-deploy/", chef_repo_
         chef_repo_tarball = 'chef-repo.tgz'
         with hide("everything"):
             execute(create_repo_tarball)
-            run('rm -rf ' + remote_chef_tarball_path + 'chef-repo')
+            run('rm -rf ' + remote_chef_tarball_path + chef_repo_dir)
             run('mkdir -p ' + remote_chef_tarball_path)
             put(chef_repo_tarball, remote_path=remote_chef_tarball_path)
             with cd(remote_chef_tarball_path):
@@ -232,7 +235,6 @@ def midonet_gw():
     add_to_run_list(env.host_string, ['recipe[midokura]'])
 
 
-
 @roles('clc')
 @task
 def configure():
@@ -242,10 +244,11 @@ def configure():
 
 
 @task
-def stack_order(stack_order):
-    for method in stack_order:
+def stack_order(method_list):
+    for method in method_list:
         execute(push_configuration)
         execute(method)
+
 
 @roles('all')
 @task
