@@ -2,13 +2,10 @@ import glob
 import json
 from os.path import splitext
 import os
-import tempfile
-import shutil
 
 from fabric.api import *
 from fabric.colors import *
 from fabric.state import output
-from fabric.contrib.project import rsync_project
 import yaml
 
 env.user = 'root'
@@ -16,9 +13,10 @@ env.pool_size = 72
 
 
 node_hash = {}
-output['stdout'] = False
-output['status'] = False
-output['running'] = False
+output['stdout'] = True
+output['status'] = True
+output['running'] = True
+
 
 __all__ = ['full_install', 'push_configuration', 'clc', 'frontends', 'midtier',
            'nodes', 'configure', 'midolmen', 'midonet_gw', 'sync_ssh_key', 'uninstall']
@@ -39,17 +37,17 @@ def action(message):
     print cyan(message)
 
 
-def translate_config():
+def translate_config(chef_repo_dir='chef-repo'):
     config_dict = yaml.load(open('config.yml').read())
     current_environment = config_dict['name']
-    filename = 'environments/' + current_environment + '.json'
+    filename = chef_repo_dir + '/environments/' + current_environment + '.json'
     with open(filename, 'w') as env_json:
         env_json.write(json.dumps(config_dict, indent=4, sort_keys=True, separators=(',', ': ')))
     return current_environment
 
 
-def compile_fabric_roles(current_environment):
-    with open('./environments/' + current_environment + '.json') as env_file:
+def compile_fabric_roles(current_environment, chef_repo_dir='chef-repo'):
+    with open(chef_repo_dir + '/environments/' + current_environment + '.json') as env_file:
         env.topology = json.loads(env_file.read())['default_attributes']['eucalyptus']['topology']
     env.roledefs['clc'] = [env.topology['clc-1']]
     env.roledefs['frontends'] = [env.topology['walrus']] + env.topology['user-facing']
@@ -65,8 +63,8 @@ def compile_fabric_roles(current_environment):
 environment_name = translate_config()
 compile_fabric_roles(environment_name)
 
-def load_local_node_info():
-    for node_file in glob.glob('nodes/*.json'):
+def load_local_node_info(chef_repo_dir='chef-repo/'):
+    for node_file in glob.glob(chef_repo_dir + 'nodes/*.json'):
         read_node_hash(node_file)
 
 def read_node_hash(node_file):
@@ -79,8 +77,8 @@ def read_node_hash(node_file):
 
 @task
 @serial
-def write_node_hash(node_name):
-    node_json = 'nodes/' + node_name + '.json'
+def write_node_hash(node_name, chef_repo_dir='chef-repo/'):
+    node_json = chef_repo_dir + 'nodes/' + node_name + '.json'
     with open(node_json, 'w') as env_json:
         env_json.write(json.dumps(node_hash[node_name], indent=4, sort_keys=True, separators=(',', ': ')))
 
@@ -116,7 +114,7 @@ def add_to_run_list(node_ip, recipe_list):
 
 
 @task
-def     clear_run_list(node_ip):
+def clear_run_list(node_ip):
     try:
         node_name = get_node_name_by_ip(node_ip)
     except FailedToFindNodeException:
@@ -125,39 +123,48 @@ def     clear_run_list(node_ip):
     execute(write_node_hash, node_name)
 
 
+@task
+@runs_once
+def create_repo_tarball(chef_repo_dir='chef-repo/'):
+    print yellow("Pushing deployment files to: " + env.host_string)
+    chef_repo_tarball = 'chef-repo.tgz'
+    local('tar zcvf ' + chef_repo_tarball + ' ' + chef_repo_dir)
+
+
 @roles('all')
 @task
-@parallel
-def push_configuration(remote_chef_repo_path="/root/chef-repo/"):
+@serial
+def push_configuration(remote_chef_tarball_path="/root/euca-deploy/", chef_repo_dir='chef-repo/'):
     """Push deployment data from localhost to Eucalyptus Machines"""
-    print yellow("Pushing deployment files to: " + env.host_string)
-    with hide('running', 'stdout', 'stderr'):
-        run('mkdir -p ' + remote_chef_repo_path)
-        rsync_project(remote_chef_repo_path, local_dir='./', delete=True)
+    if local('hostname', capture=True) != run('hostname'):
+        chef_repo_tarball = 'chef-repo.tgz'
+        execute(create_repo_tarball)
+        run('rm -rf ' + remote_chef_tarball_path + 'chef-repo')
+        run('mkdir -p ' + remote_chef_tarball_path)
+        put(chef_repo_tarball, remote_path=remote_chef_tarball_path)
+        with cd(remote_chef_tarball_path):
+            run('tar xzfv ' + chef_repo_tarball)
 
 
 @task
 def bootstrap_chef():
-    with hide('running', 'warnings'):
-        result = run('chef-client -v', warn_only=True)
-        if result.return_code != 0:
-            run('curl -L https://www.opscode.com/chef/install.sh | bash')
+    result = run('chef-client -v', warn_only=True)
+    if result.return_code != 0:
+        run('curl -L https://www.opscode.com/chef/install.sh | bash')
 
 
 @task
 @parallel
-def run_chef_client(repo_path="/root/chef-repo/", chef_command="chef-client -z", options=""):
+def run_chef_client(repo_path="/root/euca-deploy/chef-repo/", chef_command="chef-client -z", options=""):
     with cd(repo_path):
         execute(bootstrap_chef)
-        with hide('status', 'warnings'):
-            run("hostname && " + chef_command + " " + options + " -E " + environment_name)
+        run("hostname && " + chef_command + " " + options + " -E " + environment_name)
     info("Completed deployment on: " + env.host_string)
     hostname = run('hostname')
-    node_file = "nodes/" + hostname + ".json"
+    node_file = repo_path + 'nodes/' + hostname + '.json'
     ### Dont download if we are local
-    if local('hostname', capture=True) != hostname:
-        with hide('warnings'):
-            get(remote_path=repo_path + node_file, local_path=node_file)
+    if local('hostname', capture=True, ) != hostname:
+        get(remote_path=repo_path + node_file, local_path=node_file)
     read_node_hash(node_file)
 
 
