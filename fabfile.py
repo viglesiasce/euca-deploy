@@ -108,7 +108,10 @@ def add_to_run_list(node_ip, recipe_list):
         if recipe not in node_hash[node_name]['run_list']:
             node_hash[node_name]['run_list'].append(recipe)
     execute(write_node_hash, node_name)
-    if local('hostname', capture=True) != node_name:
+    with hide("everything"):
+        hostname = run('hostname')
+        is_local = local('hostname', capture=True) == hostname
+    if not is_local:
         push_configuration()
     run_chef_client()
 
@@ -136,7 +139,10 @@ def create_repo_tarball(chef_repo_dir='chef-repo/'):
 @parallel
 def push_configuration(remote_chef_tarball_path="/root/euca-deploy/", chef_repo_dir='chef-repo/'):
     """Push deployment data from localhost to Eucalyptus Machines"""
-    if local('hostname', capture=True) != run('hostname'):
+    with hide("everything"):
+        hostname = run('hostname')
+        is_local = local('hostname', capture=True) == hostname
+    if not is_local:
         chef_repo_tarball = 'chef-repo.tgz'
         with hide("everything"):
             execute(create_repo_tarball)
@@ -161,10 +167,12 @@ def run_chef_client(repo_path="/root/euca-deploy/chef-repo/", chef_command="chef
         execute(bootstrap_chef)
         run("hostname && " + chef_command + " " + options + " -E " + environment_name)
     info("Completed deployment on: " + env.host_string)
-    hostname = run('hostname')
-    node_file = repo_path + 'nodes/' + hostname + '.json'
+    with hide("everything"):
+        hostname = run('hostname')
+        is_local = local('hostname', capture=True) == hostname
     ### Dont download if we are local
-    if local('hostname', capture=True) != hostname:
+    node_file = repo_path + 'nodes/' + hostname + '.json'
+    if not is_local:
         get(remote_path=node_file, local_path=node_file)
     read_node_hash(node_file)
 
