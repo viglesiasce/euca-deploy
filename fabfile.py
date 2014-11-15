@@ -8,15 +8,19 @@ from fabric.colors import *
 from fabric.state import output
 import yaml
 
-env.user = 'root'
-env.pool_size = 72
-
 node_hash = {}
+
+env.user = 'root'
+env.parallel = True
+env.pool_size = 40
+
+
 output['stdout'] = True
 output['status'] = True
 output['running'] = True
+output['debug'] = False
 
-__all__ = ['full_install', 'push_configuration', 'clc', 'frontends', 'midtier',
+__all__ = ['install', 'push_configuration', 'clc', 'frontends', 'midtier',
            'nodes', 'configure', 'midolmen', 'midonet_gw', 'sync_ssh_key', 'uninstall']
 
 
@@ -38,6 +42,7 @@ def action(message):
 
 
 def translate_config(chef_repo_dir='chef-repo'):
+    info("Translating config from YAML to JSON")
     config_dict = yaml.load(open('config.yml').read())
     current_environment = config_dict['name']
     filename = chef_repo_dir + '/environments/' + current_environment + '.json'
@@ -132,7 +137,7 @@ def clear_run_list(node_ip):
 @task
 @runs_once
 def create_repo_tarball(chef_repo_dir='chef-repo/'):
-    print yellow("Pushing deployment files to: " + env.host_string)
+    info("Creating tarball")
     chef_repo_tarball = 'chef-repo.tgz'
     local('tar zcvf ' + chef_repo_tarball + ' ' + chef_repo_dir)
 
@@ -148,7 +153,6 @@ def push_configuration(remote_chef_tarball_path="/root/euca-deploy/", chef_repo_
     if not is_local:
         chef_repo_tarball = 'chef-repo.tgz'
         with hide("everything"):
-            execute(create_repo_tarball)
             run('rm -rf ' + remote_chef_tarball_path + chef_repo_dir)
             run('mkdir -p ' + remote_chef_tarball_path)
             put(chef_repo_tarball, remote_path=remote_chef_tarball_path)
@@ -174,9 +178,9 @@ def run_chef_client(repo_path="/root/euca-deploy/chef-repo/", chef_command="chef
         hostname = run('hostname')
         is_local = local('hostname', capture=True) == hostname
     ### Dont download if we are local
-    node_file = repo_path + 'nodes/' + hostname + '.json'
+    node_file = 'nodes/' + hostname + '.json'
     if not is_local:
-        get(remote_path=node_file, local_path=node_file)
+        get(remote_path=repo_path + node_file, local_path=node_file)
     read_node_hash(node_file)
 
 
@@ -245,8 +249,9 @@ def configure():
 
 @task
 def stack_order(method_list):
+    execute(create_repo_tarball)
+    execute(push_configuration)
     for method in method_list:
-        execute(push_configuration)
         execute(method)
 
 
@@ -257,8 +262,19 @@ def sync_ssh_key():
     run("echo '" + pub_key + "' >> /root/.ssh/authorized_keys")
 
 
+@roles('all')
 @task
-def full_install():
+def nuke():
+    action("Wiping Eucalyptus off machine: " + env.host_string)
+    run('rm -rf .chef/local-mode-cache/')
+    run('yum clean metadata')
+    clear_run_list(env.host_string)
+    add_to_run_list(env.host_string, ['recipe[eucalyptus::nuke]'])
+    clear_run_list(env.host_string)
+
+
+@task
+def install():
     """End to end Eucalyptus installation"""
     execute(stack_order, [clc, frontends, midtier, nodes, configure])
 
@@ -268,11 +284,3 @@ def uninstall():
     execute(stack_order, [nuke])
 
 
-@roles('all')
-@task
-def nuke():
-    action("Wiping Eucalyptus off machine: " + env.host_string)
-    run('yum clean metadata')
-    clear_run_list(env.host_string)
-    add_to_run_list(env.host_string, ['recipe[eucalyptus::nuke]'])
-    clear_run_list(env.host_string)
