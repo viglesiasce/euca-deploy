@@ -169,8 +169,9 @@ def bootstrap_chef():
 
 @task
 @parallel
-def run_chef_client(repo_path="/root/euca-deploy/chef-repo/", chef_command="chef-client -z", options=""):
-    with cd(repo_path):
+def run_chef_client(chef_command="chef-client -z", options=""):
+    repo_path = '/root/euca-deploy/'
+    with cd(repo_path + 'chef-repo'):
         execute(bootstrap_chef)
         run("hostname && " + chef_command + " " + options + " -E " + environment_name)
     info("Completed deployment on: " + env.host_string)
@@ -178,10 +179,12 @@ def run_chef_client(repo_path="/root/euca-deploy/chef-repo/", chef_command="chef
         hostname = run('hostname')
         is_local = local('hostname', capture=True) == hostname
     ### Dont download if we are local
-    node_file = 'nodes/' + hostname + '.json'
+    local_path = 'chef-repo/nodes/' + hostname + '.json'
+    remote_path = repo_path + local_path
     if not is_local:
-        get(remote_path=repo_path + node_file, local_path=node_file)
-    read_node_hash(node_file)
+        get(remote_path=remote_path, local_path=local_path)
+    read_node_hash(local_path)
+
 
 
 @roles('clc')
