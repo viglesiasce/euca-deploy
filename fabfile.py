@@ -1,4 +1,5 @@
 import glob
+from fabric.contrib.project import upload_project
 import json
 from os.path import splitext
 import os
@@ -20,7 +21,7 @@ output['status'] = True
 output['running'] = True
 output['debug'] = False
 
-__all__ = ['install', 'push_configuration', 'clc', 'frontends', 'midtier',
+__all__ = ['install', 'clc', 'frontends', 'midtier',
            'nodes', 'configure', 'midolmen', 'midonet_gw', 'sync_ssh_key', 'uninstall']
 
 
@@ -68,31 +69,27 @@ def compile_fabric_roles(current_environment, chef_repo_dir='chef-repo'):
 environment_name = translate_config()
 compile_fabric_roles(environment_name)
 
-
 def load_local_node_info(chef_repo_dir='chef-repo/'):
     for node_file in glob.glob(chef_repo_dir + 'nodes/*.json'):
         read_node_hash(node_file)
 
-
 def read_node_hash(node_file):
     with open(node_file) as handle:
-        try:
-            data = handle.read()
-            node_hash[splitext(node_file.split('/')[-1])[0]] = json.loads(data)
-        except ValueError:
-            pass
+        data = handle.read()
+        node_hash[splitext(node_file.split('/')[-1])[0]] = json.loads(data)
 
 
-@task
-@serial
+@parallel
 def write_node_hash(node_name, chef_repo_dir='chef-repo/'):
     node_json = chef_repo_dir + 'nodes/' + node_name + '.json'
+    node_info = json.dumps(node_hash[node_name], indent=4, sort_keys=True, separators=(',', ': '))
+    info('Writing out node: ' + node_json)
     with open(node_json, 'w') as env_json:
-        env_json.write(json.dumps(node_hash[node_name], indent=4, sort_keys=True, separators=(',', ': ')))
+        env_json.write(node_info)
+    put(local_path=node_json, remote_path='/root/euca-deploy/' + node_json)
 
 
 def get_node_name_by_ip(target_address):
-    load_local_node_info()
     for node, node_info in node_hash.iteritems():
         for interface, if_info in node_info['automatic']['network']['interfaces'].iteritems():
             for address in if_info['addresses']:
@@ -103,10 +100,12 @@ def get_node_name_by_ip(target_address):
 
 @task
 def add_to_run_list(node_ip, recipe_list):
+    load_local_node_info()
     try:
         node_name = get_node_name_by_ip(node_ip)
     except FailedToFindNodeException:
         print yellow("Doing initial bootstrap of " + env.host_string)
+        upload_project()
         execute(run_chef_client)
         node_name = get_node_name_by_ip(node_ip)
     for recipe in recipe_list:
@@ -115,13 +114,8 @@ def add_to_run_list(node_ip, recipe_list):
             node_hash[node_name]['run_list'] = []
         if recipe not in node_hash[node_name]['run_list']:
             node_hash[node_name]['run_list'].append(recipe)
-    execute(write_node_hash, node_name)
-    with hide("everything"):
-        hostname = run('hostname')
-        is_local = local('hostname', capture=True) == hostname
-    if not is_local:
-        push_configuration()
-    run_chef_client()
+    write_node_hash(node_name)
+    execute(run_chef_client)
 
 
 @task
@@ -131,34 +125,7 @@ def clear_run_list(node_ip):
     except FailedToFindNodeException:
         return
     node_hash[node_name]['run_list'] = []
-    execute(write_node_hash, node_name)
-
-
-@task
-@runs_once
-def create_repo_tarball(chef_repo_dir='chef-repo/'):
-    info("Creating tarball")
-    chef_repo_tarball = 'chef-repo.tgz'
-    local('tar zcvf ' + chef_repo_tarball + ' ' + chef_repo_dir)
-
-
-@roles('all')
-@task
-@parallel
-def push_configuration(remote_chef_tarball_path="/root/euca-deploy/", chef_repo_dir='chef-repo/'):
-    """Push deployment data from localhost to Eucalyptus Machines"""
-    with hide("everything"):
-        hostname = run('hostname')
-        is_local = local('hostname', capture=True) == hostname
-    if not is_local:
-        chef_repo_tarball = 'chef-repo.tgz'
-        with hide("everything"):
-            run('rm -rf ' + remote_chef_tarball_path + chef_repo_dir)
-            run('mkdir -p ' + remote_chef_tarball_path)
-            put(chef_repo_tarball, remote_path=remote_chef_tarball_path)
-            with cd(remote_chef_tarball_path):
-                run('tar xzfv ' + chef_repo_tarball)
-
+    write_node_hash(node_name)
 
 @task
 def bootstrap_chef():
@@ -174,15 +141,11 @@ def run_chef_client(chef_command="chef-client -z", options=""):
     with cd(repo_path + 'chef-repo'):
         execute(bootstrap_chef)
         run("hostname && " + chef_command + " " + options + " -E " + environment_name)
-    info("Completed deployment on: " + env.host_string)
-    with hide("everything"):
-        hostname = run('hostname')
-        is_local = local('hostname', capture=True) == hostname
-    ### Dont download if we are local
+    info("Completed chef client run on: " + env.host_string)
+    hostname = run('hostname')
     local_path = 'chef-repo/nodes/' + hostname + '.json'
     remote_path = repo_path + local_path
-    if not is_local:
-        get(remote_path=remote_path, local_path=local_path)
+    get(remote_path=remote_path, local_path=local_path)
     read_node_hash(local_path)
 
 
@@ -252,8 +215,6 @@ def configure():
 
 @task
 def stack_order(method_list):
-    execute(create_repo_tarball)
-    execute(push_configuration)
     for method in method_list:
         execute(method)
 
