@@ -176,7 +176,7 @@ def run_chef_client(repo_path="/root/euca-deploy/chef-repo/", chef_command="chef
     ### Dont download if we are local
     node_file = 'nodes/' + hostname + '.json'
     if not is_local:
-        get(remote_path=repo_path + node_file, local_path=node_file)
+        get(remote_path=repo_path + node_file, local_path='chef-repo' + node_file)
     read_node_hash(node_file)
 
 
