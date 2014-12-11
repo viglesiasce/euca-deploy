@@ -24,6 +24,8 @@ output['debug'] = False
 __all__ = ['install', 'clc', 'frontends', 'midtier',
            'nodes', 'configure', 'midolmen', 'midonet_gw', 'sync_ssh_key', 'uninstall']
 
+current_folder_path, current_folder_name = os.path.split(os.getcwd())
+remote_folder_path = '/root/' + current_folder_name + '/'
 
 class FailedToFindNodeException(Exception):
     pass
@@ -86,7 +88,7 @@ def write_node_hash(node_name, chef_repo_dir='chef-repo/'):
     info('Writing out node: ' + node_json)
     with open(node_json, 'w') as env_json:
         env_json.write(node_info)
-    put(local_path=node_json, remote_path='/root/euca-deploy/' + node_json)
+    put(local_path=node_json, remote_path=remote_folder_path + node_json)
 
 
 def get_node_name_by_ip(target_address):
@@ -137,14 +139,13 @@ def bootstrap_chef():
 @task
 @parallel
 def run_chef_client(chef_command="chef-client -z", options=""):
-    repo_path = '/root/euca-deploy/'
-    with cd(repo_path + 'chef-repo'):
+    with cd(remote_folder_path + 'chef-repo'):
         execute(bootstrap_chef)
         run("hostname && " + chef_command + " " + options + " -E " + environment_name)
     info("Completed chef client run on: " + env.host_string)
     hostname = run('hostname')
     local_path = 'chef-repo/nodes/' + hostname + '.json'
-    remote_path = repo_path + local_path
+    remote_path = remote_folder_path + local_path
     get(remote_path=remote_path, local_path=local_path)
     read_node_hash(local_path)
 
