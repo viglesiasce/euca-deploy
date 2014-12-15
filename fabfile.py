@@ -9,6 +9,9 @@ from fabric.colors import *
 from fabric.state import output
 import yaml
 
+
+CHEF_VERSION = "11.16.4"
+
 node_hash = {}
 
 env.user = 'root'
@@ -133,7 +136,7 @@ def clear_run_list(node_ip):
 def bootstrap_chef():
     result = run('chef-client -v', warn_only=True)
     if result.return_code != 0:
-        run('curl -L https://www.opscode.com/chef/install.sh | bash')
+        run('curl -L https://www.chef.io/chef/install.sh | sudo bash -s -- -v ' + CHEF_VERSION)
 
 
 @task
