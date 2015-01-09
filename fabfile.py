@@ -91,7 +91,10 @@ def write_node_hash(node_name, chef_repo_dir='chef-repo/'):
     info('Writing out node: ' + node_json)
     with open(node_json, 'w') as env_json:
         env_json.write(node_info)
-    put(local_path=node_json, remote_path=remote_folder_path + node_json)
+    remote_hostname = run('hostname')
+    local_hostname = local('hostname', capture=True)
+    if local_hostname != remote_hostname:
+        put(local_path=node_json, remote_path=remote_folder_path + node_json)
 
 
 def get_node_name_by_ip(target_address):
@@ -146,10 +149,12 @@ def run_chef_client(chef_command="chef-client -z", options=""):
         execute(bootstrap_chef)
         run("hostname && " + chef_command + " " + options + " -E " + environment_name)
     info("Completed chef client run on: " + env.host_string)
-    hostname = run('hostname')
-    local_path = 'chef-repo/nodes/' + hostname + '.json'
+    remote_hostname = run('hostname')
+    local_hostname = local('hostname', capture=True)
+    local_path = 'chef-repo/nodes/' + remote_hostname + '.json'
     remote_path = remote_folder_path + local_path
-    get(remote_path=remote_path, local_path=local_path)
+    if local_hostname != remote_hostname:
+        get(remote_path=remote_path, local_path=local_path)
     read_node_hash(local_path)
 
 
