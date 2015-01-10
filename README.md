@@ -20,7 +20,7 @@ This is a harness for running the Eucalyptus cookbook against a distributed syst
 ## Deploy
 
 - Edit the config.yml file to match your deployment topology and configuration
-- Run ```fab install```
+- Run ```fab install -p <root-ssh-password-for-deployment-systems>```
     
     
     
