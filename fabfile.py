@@ -1,5 +1,5 @@
 import glob
-from fabric.contrib.project import upload_project
+from fabric.contrib.project import rsync_project
 import json
 from os.path import splitext
 import os
@@ -84,7 +84,6 @@ def read_node_hash(node_file):
         node_hash[splitext(node_file.split('/')[-1])[0]] = json.loads(data)
 
 
-@parallel
 def write_node_hash(node_name, chef_repo_dir='chef-repo/'):
     node_json = chef_repo_dir + 'nodes/' + node_name + '.json'
     node_info = json.dumps(node_hash[node_name], indent=4, sort_keys=True, separators=(',', ': '))
@@ -93,8 +92,6 @@ def write_node_hash(node_name, chef_repo_dir='chef-repo/'):
         env_json.write(node_info)
     remote_hostname = run('hostname')
     local_hostname = local('hostname', capture=True)
-    if local_hostname != remote_hostname:
-        put(local_path=node_json, remote_path=remote_folder_path + node_json)
 
 
 def get_node_name_by_ip(target_address):
@@ -113,7 +110,6 @@ def add_to_run_list(node_ip, recipe_list):
         node_name = get_node_name_by_ip(node_ip)
     except FailedToFindNodeException:
         print yellow("Doing initial bootstrap of " + env.host_string)
-        upload_project()
         execute(run_chef_client)
         node_name = get_node_name_by_ip(node_ip)
     for recipe in recipe_list:
@@ -145,15 +141,18 @@ def bootstrap_chef():
 @task
 @parallel
 def run_chef_client(chef_command="chef-client -z", options=""):
-    with cd(remote_folder_path + 'chef-repo'):
-        execute(bootstrap_chef)
-        run("hostname && " + chef_command + " " + options + " -E " + environment_name)
-    info("Completed chef client run on: " + env.host_string)
     remote_hostname = run('hostname')
     local_hostname = local('hostname', capture=True)
     local_path = 'chef-repo/nodes/' + remote_hostname + '.json'
     remote_path = remote_folder_path + local_path
-    if local_hostname != remote_hostname:
+    is_remote_command = local_hostname != remote_hostname
+    if is_remote_command:
+        rsync_project(remote_folder_path, ssh_opts="-o StrictHostKeyChecking=no", delete=True)
+    execute(bootstrap_chef)
+    with cd(remote_folder_path + 'chef-repo'):
+        run("hostname && " + chef_command + " " + options + " -E " + environment_name)
+    info("Completed chef client run on: " + env.host_string)
+    if is_remote_command:
         get(remote_path=remote_path, local_path=local_path)
     read_node_hash(local_path)
 
@@ -234,7 +233,6 @@ def sync_ssh_key():
     pub_key = local('cat ' + os.path.expanduser("~/.ssh/id_rsa.pub"), capture=True)
     run("echo '" + pub_key + "' >> /root/.ssh/authorized_keys")
 
-
 @roles('all')
 @task
 def nuke():
@@ -249,7 +247,7 @@ def nuke():
 @task
 def install():
     """End to end Eucalyptus installation"""
-    execute(stack_order, [clc, frontends, midtier, nodes, configure])
+    execute(stack_order, [sync_ssh_key, clc, frontends, midtier, nodes, configure])
 
 
 @task
