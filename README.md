@@ -6,7 +6,7 @@ This is a harness for running the Eucalyptus cookbook against a distributed syst
 
 ### On a CentOS 6 system:
 
-    yum install -y python-devel gcc git
+    yum install -y python-devel gcc git python-setuptools
     easy_install fabric PyYAML
     yum install -y https://opscode-omnibus-packages.s3.amazonaws.com/el/6/x86_64/chefdk-0.3.5-1.x86_64.rpm
     git clone https://github.com/viglesiasce/euca-deploy
@@ -20,7 +20,7 @@ This is a harness for running the Eucalyptus cookbook against a distributed syst
 ## Deploy
 
 - Edit the config.yml file to match your deployment topology and configuration
-- Run ```fab install```
+- Run ```fab install -p <root-ssh-password-for-deployment-systems>```
     
     
     
