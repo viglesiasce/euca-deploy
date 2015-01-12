@@ -1,6 +1,6 @@
 --- 
 name: scale-system
-description: 4.0 EDGE Testing
+description: 4.1 EDGE Testing
 default_attributes:
   eucalyptus:
     log-level: INFO
@@ -56,9 +56,7 @@ default_attributes:
       bridge-interface: br0
       bridged-nic: em1
     init-script-url: http://git.qa1.eucalyptus-systems.com/qa-repos/eucalele/raw/master/scripts/network-interfaces.sh
-    #eucalyptus-repo: http://packages.release.eucalyptus-systems.com/yum/tags/eucalyptus-4.0/centos/6/x86_64/
-    eucalyptus-repo: http://jenkins.release.eucalyptus-systems.com/job/p1-eucalyptus-build-custom-s03-rpm/44/artifact/results/
-    #euca2ools-repo: http://packages.release.eucalyptus-systems.com/yum/tags/euca2ools-3.1/centos/6/x86_64/
+    eucalyptus-repo: http://packages.release.eucalyptus-systems.com/yum/tags/eucalyptus-devel/centos/6/x86_64/
     euca2ools-repo: http://packages.release.eucalyptus-systems.com/yum/tags/euca2ools-devel/centos/6/x86_64/
     yum-options: "--nogpg"
 override_attributes: {}
