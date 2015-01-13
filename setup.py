@@ -22,11 +22,7 @@ setup(
     test_suite='nose.collector',
     tests_require=['nose'],
     install_requires=['fabric', 'PyYaml', 'argparse'],
-    entry_points={
-        'console_scripts': [
-            'fab = fabric.main:main',
-        ]
-    },
+    scripts=['bin/euca-deploy'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
