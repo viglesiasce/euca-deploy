@@ -1,5 +1,6 @@
 VERSION = (0, 1, 0, 'alpha', 0)
 
+
 # Inspired by: https://github.com/fabric/fabric/blob/master/fabric/version.py
 def get_version():
     branch = "%s.%s" % (VERSION[0], VERSION[1])

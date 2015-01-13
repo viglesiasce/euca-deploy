@@ -3,21 +3,14 @@ name: scale-system
 description: 4.1 EDGE Testing
 default_attributes:
   eucalyptus:
-    log-level: INFO
-    install-load-balancer: true
-    install-imaging-worker: true
     topology:
       clc-1: 10.112.10.1
       walrus: 10.112.10.2
       user-facing:
-      - 10.112.10.1
-      - 10.112.10.2
       - 10.112.10.3
-      - 10.112.10.4
-      - 10.112.10.5
       clusters:
         one:
-          cc-1: 10.112.10.1
+          cc-1: 10.112.10.4
           sc-1: 10.112.10.5
           storage-backend: das
           das-device: vg01
@@ -38,12 +31,11 @@ default_attributes:
       work-size: 160000
     network:
       mode: EDGE
-      metadata-use-private-ip: Y
       config-json:
         InstanceDnsServers:
         - 10.112.10.1
         PublicIps:
-        - 10.116.150.1-10.116.150.254
+        - 10.112.150.1-10.112.150.254
         Clusters:
         - Name: one
           Subnet:

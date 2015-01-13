@@ -37,25 +37,38 @@ class ChefManager():
         self.current_path, self.folder_name = os.path.split(os.getcwd())
         self.remote_folder_path = '/root/' + self.folder_name + '/'
         self.ssh_opts = "-o StrictHostKeyChecking=no"
-        self.local_hostname = local('hostname', capture=True)
         self.node_hash = {}
-        self.remote_hostnames = execute(run, 'hostname', hosts=hosts)
+        with hide('running', 'stdout', 'stderr'):
+            self.local_hostname = local('hostname', capture=True)
+            self.remote_hostnames = execute(run, 'hostname', hosts=hosts)
 
     @staticmethod
     def sync_ssh_key(hosts):
-        pub_key = local('cat ' + os.path.expanduser("~/.ssh/id_rsa.pub"),
-                        capture=True)
-        execute(run, "echo '" + pub_key + "' >> /root/.ssh/authorized_keys",
-                hosts=hosts)
+        info('Syncing SSH keys with system under deployment')
+        with hide('running', 'stdout', 'stderr'):
+            pub_key = local('cat ' + os.path.expanduser("~/.ssh/id_rsa.pub"),
+                            capture=True)
+            execute(run,
+                    "if grep -v '{0}' /root/.ssh/authorized_keys; then "
+                    "echo '{0}' >> "
+                    "   /root/.ssh/authorized_keys"
+                    ";fi".format(pub_key),
+                    hosts=hosts)
 
     @staticmethod
-    def download_cookbook_deps():
-        local('chef generate chef-repo')
-        local('mkdir -p chef-repo/environments')
-        local('mkdir -p chef-repo/nodes')
-        local('git clone https://github.com/eucalyptus/eucalyptus-cookbook')
-        local('berks vendor --berksfile eucalyptus-cookbook/Berksfile '
-              'chef-repo/cookbooks')
+    def create_chef_repo():
+        info('Creating Chef repository')
+        with hide('running', 'stdout', 'stderr'):
+            local('chef generate app chef-repo')
+            local('mkdir -p chef-repo/environments')
+            local('mkdir -p chef-repo/nodes')
+
+    @staticmethod
+    def download_cookbooks(berksfile, chef_repo='chef-repo/cookbooks'):
+        info('Downloading Chef cookbooks')
+        with hide('running', 'stdout', 'stderr'):
+            local('berks vendor --berksfile {0} {1}'.format(berksfile,
+                                                            chef_repo))
 
     def load_local_node_info(self, chef_repo_dir='chef-repo/'):
         for node_file in glob.glob(chef_repo_dir + 'nodes/*.json'):
@@ -65,13 +78,16 @@ class ChefManager():
         with open(node_file) as handle:
             data = handle.read()
             node_name = splitext(node_file.split('/')[-1])[0]
-            self.node_hash[node_name] = json.loads(data)
+            try:
+                self.node_hash[node_name] = json.loads(data)
+            except ValueError, e:
+                print 'Unable to read: ' + node_name
+                raise e
 
     def write_node_hash(self, node_name, chef_repo_dir='chef-repo/'):
         node_json = chef_repo_dir + 'nodes/' + node_name + '.json'
         node_info = json.dumps(self.node_hash[node_name], indent=4,
                                sort_keys=True, separators=(',', ': '))
-        info('Writing out node: ' + node_json)
         with open(node_json, 'w') as env_json:
             env_json.write(node_info)
 
@@ -92,7 +108,8 @@ class ChefManager():
                 node_name = self.get_node_name_by_ip(node_ip)
             except FailedToFindNodeException:
                 print yellow("Doing initial bootstrap of " + node_ip)
-                self.run_chef_client(hosts=hosts)
+                execute(self.push_deployment_data, hosts=hosts)
+                execute(self.run_chef_client, hosts=hosts)
                 node_name = self.get_node_name_by_ip(node_ip)
             for recipe in recipe_list:
                 if 'run_list' not in self.node_hash[node_name]:
@@ -111,37 +128,27 @@ class ChefManager():
             self.node_hash[node_name]['run_list'] = []
             self.write_node_hash(node_name)
 
-    def bootstrap_chef(self, hosts):
-        results = execute(run, 'chef-client -v', warn_only=True, hosts=hosts)
-        install_hosts = hosts
-        for host in results.keys():
-            if 'Chef' in results[host]:
-                install_hosts.remove(host)
-        if install_hosts:
-            info("Installing chef client on: " + str(hosts) + str(results))
-            execute(run,
-                    'curl -L https://www.chef.io/chef/install.sh | '
-                    'sudo bash -s -- -v ' + self.CHEF_VERSION,
-                    hosts=install_hosts)
+    def bootstrap_chef(self):
+        result = run('chef-client -v', warn_only=True)
+        if result.return_code != 0:
+            info("Installing chef client on: " + str(env.host))
+            run('curl -L https://www.chef.io/chef/install.sh | '
+                'sudo bash -s -- -v ' + self.CHEF_VERSION)
 
-    def run_chef_client(self, hosts, chef_command="chef-client -z"):
-        # self.bootstrap_chef(hosts)
-        info("Running chef client run on: " + str(hosts))
+    def run_chef_client(self, chef_command="chef-client -z"):
         with cd(self.remote_folder_path + 'chef-repo'):
-            execute(run, chef_command + " -E " + self.environment_name,
-                    hosts=hosts)
+            with hide('running'):
+                run(chef_command + " -E " + self.environment_name)
 
-    def push_deployment_data(self, hosts):
-        info('Pushing data to: ' + str(hosts))
-        execute(rsync_project, local_dir='./',
-                remote_dir=self.remote_folder_path,
-                ssh_opts=self.ssh_opts, delete=True, hosts=hosts)
+    def push_deployment_data(self):
+        with hide('running', 'stdout', 'stderr'):
+            rsync_project(local_dir='./',
+                    remote_dir=self.remote_folder_path,
+                    ssh_opts=self.ssh_opts, delete=True)
 
     def pull_node_info(self):
-        for host in self.remote_hostnames:
-            local_path = 'chef-repo/nodes/' + \
-                         self.remote_hostnames[host] + '.json'
-            remote_path = self.remote_folder_path + local_path
-            execute(get, remote_path=remote_path,
-                    local_path=local_path, hosts=[host])
+        local_path = 'chef-repo/nodes/' + run('hostname') + '.json'
+        remote_path = self.remote_folder_path + local_path
+        if self.local_hostname != run('hostname'):
+            get(remote_path=remote_path, local_path=local_path)
             self.read_node_hash(local_path)
