@@ -11,9 +11,9 @@ This is a harness for running the Eucalyptus cookbook against a distributed syst
     yum install -y https://opscode-omnibus-packages.s3.amazonaws.com/el/6/x86_64/chefdk-0.3.5-1.x86_64.rpm
     
 ## Deploy
-Deployment is broken down into 3 phases:
+Deployment is broken down into 4 phases:
 
-### Configuration
+### Configure
 The configuration is written in YAML and uses the Chef environment structure. Examples can be found in the examples directory. For a full list of attributes that can be set look at the [Eucalyptus Cookbook attributes](https://github.com/eucalyptus/eucalyptus-cookbook/blob/testing/attributes/default.rb). Edit the etc/environment.yml file to match your deployment topology and configuration.
 
 ### Prepare
