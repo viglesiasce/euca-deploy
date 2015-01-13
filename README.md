@@ -9,6 +9,9 @@ This is a harness for running the Eucalyptus cookbook against a distributed syst
     yum install -y python-devel gcc git python-setuptools
     easy_install fabric PyYAML
     yum install -y https://opscode-omnibus-packages.s3.amazonaws.com/el/6/x86_64/chefdk-0.3.5-1.x86_64.rpm
+    git clone https://github.com/viglesiasce/euca-deploy
+    cd euca-deploy
+    python setup.py install
     
 ## Deploy
 Deployment is broken down into 4 phases:
@@ -19,17 +22,17 @@ The configuration is written in YAML and uses the Chef environment structure. Ex
 ### Prepare
 This step ensures that Chef is installed on all servers and that we can SSH to all of them. It is nice to know that we are on good footing before we get going with the deployment.
 
-    ./bin/euca-deploy prepare -p <root-ssh-password-for-deployment-systems>
+    euca-deploy prepare -p <root-ssh-password-for-deployment-systems>
 
 ### Bootstrap
 This step deploys the CLC and initializes the database. Here we are getting a bit deeper and if complete, we can assume that we've are on good footing to continue deploying the rest of the cloud.
 
-    ./bin/euca-deploy bootstrap -p <root-ssh-password-for-deployment-systems>
+    euca-deploy bootstrap -p <root-ssh-password-for-deployment-systems>
   
 ### Provision
 Provisions the rest of the system or update the configuration of an existing system. If you change anything in your environment.yml, you can use this to push that change out to your cloud.
 
-    ./bin/euca-deploy provision -p <root-ssh-password-for-deployment-systems>
+    euca-deploy provision -p <root-ssh-password-for-deployment-systems>
     
     
     
