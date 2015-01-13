@@ -14,9 +14,6 @@ class ComponentDeployer():
         self.config_file = config_file
         self.config = self.read_config()
         self.chef_repo_dir = 'chef-repo'
-        self.environment_name = self.write_json_environment()
-        self.roles = self.generate_roles()
-        self.all_hosts = self.roles['all']
         ChefManager.create_chef_repo()
         with hide('running'):
             local('if [ ! -d eucalyptus-cookbook ]; then '
@@ -27,6 +24,9 @@ class ComponentDeployer():
         ChefManager.download_cookbooks('eucalyptus-cookbook/Berksfile',
                                        os.path.join(self.chef_repo_dir +
                                                     '/cookbooks'))
+        self.environment_name = self.write_json_environment()
+        self.roles = self.generate_roles()
+        self.all_hosts = self.roles['all']
         self.chef_manager = ChefManager(password, self.environment_name,
                                         self.roles['all'])
 
@@ -73,6 +73,8 @@ class ComponentDeployer():
             roles['storage-controller'].append(sc)
             roles['node-controller'] += nodes
             roles['all'] += [cc, sc] + nodes
+        roles['midolman'] = roles['node-controller']
+        roles['midonet-gw'] = roles['clc']
         return roles
 
     def prepare(self):
