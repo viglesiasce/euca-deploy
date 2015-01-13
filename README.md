@@ -18,7 +18,7 @@ This is a harness for running the Eucalyptus cookbook against a distributed syst
 - Bootstrap the CLC
   ```./bin/deployer/euca-deploy bootstrap -p <root-ssh-password-for-deployment-systems>```
 - Provision the rest of the system or update the configuration of an existing system
-  ```./bin/deployer/euca-deploy bootstrap -p <root-ssh-password-for-deployment-systems>```
+  ```./bin/deployer/euca-deploy provision -p <root-ssh-password-for-deployment-systems>```
     
     
     
