@@ -73,8 +73,9 @@ class ComponentDeployer():
             roles['storage-controller'].append(sc)
             roles['node-controller'] += nodes
             roles['all'] += [cc, sc] + nodes
-        roles['midolman'] = roles['node-controller']
-        roles['midonet-gw'] = roles['clc']
+        if euca_attributes['network']['mode'] == 'VPCMIDO':
+            roles['midolman'] = roles['node-controller']
+            roles['midonet-gw'] = roles['clc']
         return roles
 
     def prepare(self):
