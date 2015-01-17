@@ -114,6 +114,6 @@ class ComponentDeployer():
         self.chef_manager.clear_run_list(self.all_hosts)
         self.chef_manager.add_to_run_list(self.all_hosts,
                                           self.config['recipes']['nuke'])
-        self.chef_manager.run_chef_client(self.all_hosts)
+        self.run_chef_on_hosts(self.all_hosts)
         self.chef_manager.clear_run_list(self.all_hosts)
 

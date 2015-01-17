@@ -93,11 +93,9 @@ class ChefManager():
 
     def get_node_name_by_ip(self, target_address):
         for node, node_info in self.node_hash.iteritems():
-            nics = node_info['automatic']['network']['interfaces']
-            for interface, if_info in nics.iteritems():
-                for address in if_info['addresses']:
-                    if target_address == address:
-                        return node_info['name']
+            ipaddress = node_info['automatic']['ipaddress']
+            if target_address == ipaddress:
+                return node_info['name']
         raise FailedToFindNodeException("Unable to find node: " +
                                         target_address)
 
@@ -120,10 +118,12 @@ class ChefManager():
             self.write_node_hash(node_name)
 
     def clear_run_list(self, hosts):
+        self.load_local_node_info()
         for node_ip in hosts:
             try:
                 node_name = self.get_node_name_by_ip(node_ip)
             except FailedToFindNodeException:
+                info('Unable to find node:' + node_ip)
                 continue
             self.node_hash[node_name]['run_list'] = []
             self.write_node_hash(node_name)
