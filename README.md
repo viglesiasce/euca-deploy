@@ -8,7 +8,7 @@ This is a harness for running the Eucalyptus cookbook against a distributed syst
 
     yum install -y python-devel gcc git python-setuptools
     easy_install fabric PyYAML
-    yum install -y https://opscode-omnibus-packages.s3.amazonaws.com/el/6/x86_64/chefdk-0.3.5-1.x86_64.rpm
+    curl -L https://www.opscode.com/chef/install.sh | sudo bash -s -- -P chefdk
     git clone https://github.com/viglesiasce/euca-deploy
     cd euca-deploy
     python setup.py install
