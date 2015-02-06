@@ -80,6 +80,7 @@ class ComponentDeployer():
 
     def prepare(self):
         self.chef_manager.sync_ssh_key(self.all_hosts)
+        self.chef_manager.clear_run_list(self.all_hosts)
         order = [self.chef_manager.push_deployment_data,
                  self.chef_manager.bootstrap_chef,
                  self.chef_manager.run_chef_client,
@@ -97,6 +98,7 @@ class ComponentDeployer():
     def bootstrap(self):
         # Install CLC and Initialize DB
         clc = self.roles['clc']
+        self.chef_manager.clear_run_list(self.all_hosts)
         self.chef_manager.add_to_run_list(clc,
                                           self.config['recipes']['clc'])
         self.run_chef_on_hosts(clc)
