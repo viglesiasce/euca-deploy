@@ -1,0 +1,65 @@
+---
+  chef_type: "environment"
+  cookbook_versions: {}
+  default_attributes: 
+    eucalyptus: 
+      default-img-url: "http://images.walrus.cloud.qa1.eucalyptus-systems.com:8773/precise-server-cloudimg-amd64-disk1.img"
+      enterprise-repo: "http://packages.release.eucalyptus-systems.com/yum/tags/enterprise-4.1/centos/6/x86_64/"
+      euca2ools-repo: "http://packages.release.eucalyptus-systems.com/yum/tags/euca2ools-3.2/centos/6/x86_64/"
+      eucalyptus-repo: "http://packages.release.eucalyptus-systems.com/yum/tags/eucalyptus-4.1/centos/6/x86_64/"
+      init-script-url: "http://git.qa1.eucalyptus-systems.com/qa-repos/eucalele/raw/master/scripts/network-interfaces.sh"
+      install-type: "source"
+      log-level: "DEBUG"
+      nc: 
+        max-cores: 32
+      network: 
+        bridge-interface: "br0"
+        bridged-nic: "em1"
+        config-json:
+          Mode: EDGE
+          Clusters: 
+            - 
+              Name: "one"
+              PrivateIps: 
+                - "10.111.30.212"
+                - "10.111.30.213"
+                - "10.111.30.214"
+                - "10.111.30.215"
+              Subnet: 
+                Gateway: "10.111.0.1"
+                Name: "10.111.0.0"
+                Netmask: "255.255.0.0"
+                Subnet: "10.111.0.0"
+          InstanceDnsServers: 
+            - "10.111.5.87"
+          PublicIps: 
+            - "10.111.30.224"
+            - "10.111.30.225"
+            - "10.111.30.226"
+            - "10.111.30.227"
+        mode: "EDGE"
+        nc-router: "N"
+        private-interface: "br0"
+        public-interface: "br0"
+      source-branch: "dev-chuck-EUCANETD42"
+      source-repo: "ssh://repo-euca@git.eucalyptus-systems.com/internal"
+      system-properties: 
+        cloudformation.url_domain_whitelist: "*s3.amazonaws.com,*qa1.eucalyptus-systems.com"
+      topology: 
+        clc-1: "10.111.1.72"
+        clusters: 
+          one: 
+            cc-1: "10.111.1.94"
+            das-device: "vg01"
+            nodes: "10.111.1.107"
+            sc-1: "10.111.1.94"
+            storage-backend: "das"
+        user-facing: 
+          - "10.111.1.72"
+        walrus: "10.111.1.72"
+      yum-options: "--nogpg"
+  description: ""
+  json_class: "Chef::Environment"
+  name: "chuck-vic-1124"
+  override_attributes: {}
+
