@@ -105,6 +105,7 @@ class ComponentDeployer():
 
     def provision(self):
         # Install all other components and configure CLC
+        self.chef_manager.clear_run_list(self.all_hosts)
         for role in self.config['recipes']:
             self.chef_manager.add_to_run_list(self.roles[role],
                                               self.config['recipes'][role])
