@@ -48,12 +48,14 @@ class ChefManager():
         with hide('running', 'stdout', 'stderr'):
             pub_key = local('cat ' + os.path.expanduser("~/.ssh/id_rsa.pub"),
                             capture=True)
-            execute(run,
-                    "if grep -v '{0}' /root/.ssh/authorized_keys; then "
-                    "echo '{0}' >> "
-                    "   /root/.ssh/authorized_keys"
-                    ";fi".format(pub_key),
-                    hosts=hosts)
+            cmd = ("yum install rsync -y --nogpg;"
+                   "mkdir -p /root/.ssh;"
+                   "chmod 0600 /root/.ssh;"
+                   "touch /root/.ssh/authorized_keys;"
+                   "chmod 0644 /root/.ssh/authorized_keys;"
+                   "grep '{0}' /root/.ssh/authorized_keys || echo '{0}' >> /root/.ssh/authorized_keys".format(pub_key))
+            info('Running command: {0}'.format(cmd))
+            execute(run, cmd, hosts=hosts)
 
     @staticmethod
     def create_chef_repo():
@@ -84,20 +86,24 @@ class ChefManager():
                 print 'Unable to read: ' + node_name
                 raise e
 
-    def write_node_hash(self, node_name, chef_repo_dir='chef-repo/'):
-        node_json = chef_repo_dir + 'nodes/' + node_name + '.json'
-        node_info = json.dumps(self.node_hash[node_name], indent=4,
-                               sort_keys=True, separators=(',', ': '))
-        with open(node_json, 'w') as env_json:
-            env_json.write(node_info)
-
     def get_node_name_by_ip(self, target_address):
         for node, node_info in self.node_hash.iteritems():
-            ipaddress = node_info['automatic']['ipaddress']
-            if target_address == ipaddress:
+            #ipaddress = node_info['automatic']['ipaddress']
+            if target_address in self.get_node_address_list(node_info):
                 return node_info['name']
         raise FailedToFindNodeException("Unable to find node: " +
                                         target_address)
+
+    def get_node_address_list(self, node_info):
+        auto = node_info['automatic']
+        addrs = [auto['ipaddress']]
+        network = auto.get('network')
+        if network:
+            interfaces = network.get('interfaces')
+            for interface, i_info  in  interfaces.iteritems():
+                for address in i_info.get('addresses', {}):
+                    addrs.append(address)
+        return addrs
 
     def add_to_run_list(self, hosts, recipe_list):
         for node_ip in hosts:
@@ -132,7 +138,7 @@ class ChefManager():
         result = run('chef-client -v', warn_only=True)
         if result.return_code != 0:
             info("Installing chef client on: " + str(env.host))
-            run('curl -L https://www.chef.io/chef/install.sh | '
+            run('curl --insecure -L https://www.chef.io/chef/install.sh | '
                 'sudo bash -s -- -v ' + self.CHEF_VERSION)
 
     def run_chef_client(self, chef_command="chef-client -z"):
@@ -142,6 +148,7 @@ class ChefManager():
 
     def push_deployment_data(self):
         with hide('running', 'stdout', 'stderr'):
+            info("rsyncing deployment data...")
             rsync_project(local_dir='./',
                     remote_dir=self.remote_folder_path,
                     ssh_opts=self.ssh_opts, delete=True)

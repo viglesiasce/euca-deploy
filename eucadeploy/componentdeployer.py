@@ -56,17 +56,15 @@ class ComponentDeployer():
             euca_attributes = env_dict['default_attributes']['eucalyptus']
             topology = euca_attributes['topology']
         roles = {'clc': [topology['clc-1']],
-                 'walrus': [topology['walrus']],
                  'user-facing': topology['user-facing'],
-                 'cluster-controller': [],
-                 'storage-controller': [],
-                 'node-controller': [],
-                 'vmware-broker': [],
-                 'nuke': [], 'midolman': [], 'midonet-gw': [],
+                 'cluster-controller': [], 'storage-controller': [],
+                 'node-controller': [], 'vmware-broker': [], 'nuke': [],
+                 'midolman': [], 'midonet-gw': [],
                  'configure': [topology['clc-1']],
-                 'all': [topology['clc-1'],
-                        topology['walrus']] + topology['user-facing']
-        }
+                 'all': [topology['clc-1']] + topology['user-facing']}
+        if topology.has_key('walrus'):
+            roles['walrus']= [topology['walrus']]
+            roles['all'].append(topology['walrus'])
         for name in topology['clusters']:
             cc = topology['clusters'][name]['cc-1']
             sc = topology['clusters'][name]['sc-1']
