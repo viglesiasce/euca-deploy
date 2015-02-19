@@ -18,16 +18,7 @@ if __name__ == '__main__':
                                            args.environment,
                                            args.config)
     try:
-        if args.operation == 'prepare':
-            component_deployer.prepare()
-        elif args.operation == 'bootstrap':
-            component_deployer.bootstrap()
-        elif args.operation == 'provision':
-            component_deployer.provision()
-        elif args.operation == 'uninstall':
-            component_deployer.uninstall()
-        else:
-            print 'Unknown Operation: ' + args.operation
-            exit(1)
+        function = getattr(component_deployer, args.operation)
+        function()
     finally:
         fabric.network.disconnect_all()
