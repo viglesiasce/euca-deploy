@@ -34,7 +34,7 @@ class ComponentDeployer():
         return yaml.load(open(self.config_file).read())
 
     def get_recipe_list(self, component):
-        for recipe_dict in self.config_file['recipes']:
+        for recipe_dict in self.config['recipes']:
             if recipe_dict.has_key(component):
                 return recipe_dict[component]
         raise ValueError('No component found for: ' + component)
