@@ -33,6 +33,12 @@ class ComponentDeployer():
     def read_config(self):
         return yaml.load(open(self.config_file).read())
 
+    def get_recipe_list(self, component):
+        for recipe_dict in self.config_file['recipes']:
+            if recipe_dict.has_key(component):
+                return recipe_dict[component]
+        raise ValueError('No component found for: ' + component)
+
     def write_json_environment(self):
         environment_dict = yaml.load(open(self.environment_file).read())
         current_environment = environment_dict['name']
@@ -44,7 +50,6 @@ class ComponentDeployer():
         return current_environment
 
     def generate_roles(self):
-        roles = {}
         with open(self.chef_repo_dir + '/environments/' +
                 self.environment_name + '.json') as env_file:
             env_dict = json.loads(env_file.read())
@@ -100,23 +105,25 @@ class ComponentDeployer():
         clc = self.roles['clc']
         self.chef_manager.clear_run_list(self.all_hosts)
         self.chef_manager.add_to_run_list(clc,
-                                          self.config['recipes']['clc'])
+                                          self.get_recipe_list('clc'))
         self.run_chef_on_hosts(clc)
 
     def provision(self):
         # Install all other components and configure CLC
         self.chef_manager.clear_run_list(self.all_hosts)
-        for role in self.config['recipes']:
-            self.chef_manager.add_to_run_list(self.roles[role],
-                                              self.config['recipes'][role])
+        for role_dict in self.config['recipes']:
+            component_name = role_dict.keys().pop()
+            self.chef_manager.add_to_run_list(self.roles[component_name],
+                                              self.get_recipe_list(
+                                                  component_name))
         self.chef_manager.add_to_run_list(self.roles['clc'],
-                                          self.config['recipes']['configure'])
+                                          self.get_recipe_list('configure'))
         self.run_chef_on_hosts(self.all_hosts)
 
     def uninstall(self):
         self.chef_manager.clear_run_list(self.all_hosts)
         self.chef_manager.add_to_run_list(self.all_hosts,
-                                          self.config['recipes']['nuke'])
+                                          self.get_recipe_list('nuke'))
         self.run_chef_on_hosts(self.all_hosts)
         self.chef_manager.clear_run_list(self.all_hosts)
 

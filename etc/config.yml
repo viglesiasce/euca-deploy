@@ -1,25 +1,25 @@
 ---
 recipes:
-  clc:
+  - clc:
     - eucalyptus::cloud-controller
     - eucalyptus::register-components
-  user-facing:
+  - user-facing:
     - eucalyptus::user-facing
-  walrus:
+  - walrus:
     - eucalyptus::walrus
-  cluster-controller:
+  - cluster-controller:
     - eucalyptus::cluster-controller
-  storage-controller:
+  - storage-controller:
     - eucalyptus::storage-controller
-  vmware-broker:
+  - vmware-broker:
     - eucalyptus::vmware-broker
-  node-controller:
+  - node-controller:
     - eucalyptus::node-controller
-  midolman:
+  - midolman:
     - midokura::midolman
-  midonet-gw:
+  - midonet-gw:
     - midokura
-  configure:
+  - configure:
     - eucalyptus::configure
-  nuke:
+  - nuke:
     - eucalyptus::nuke
