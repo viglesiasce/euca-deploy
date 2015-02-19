@@ -86,6 +86,13 @@ class ChefManager():
                 print 'Unable to read: ' + node_name
                 raise e
 
+    def write_node_hash(self, node_name, chef_repo_dir='chef-repo/'):
+        node_json = chef_repo_dir + 'nodes/' + node_name + '.json'
+        node_info = json.dumps(self.node_hash[node_name], indent=4,
+                               sort_keys=True, separators=(',', ': '))
+        with open(node_json, 'w') as env_json:
+            env_json.write(node_info)
+
     def get_node_name_by_ip(self, target_address):
         for node, node_info in self.node_hash.iteritems():
             #ipaddress = node_info['automatic']['ipaddress']
