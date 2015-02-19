@@ -13,11 +13,15 @@ This is a harness for running the Eucalyptus cookbook against a distributed syst
     cd euca-deploy
     python setup.py install
     
-## Deploy
-Deployment is broken down into 4 phases:
+## Lifecycle Actions
+The cloud lifecycle is broken down into many phases:
 
 ### Configure
 The configuration is written in YAML and uses the Chef environment structure. Examples can be found in the examples directory. For a full list of attributes that can be set look at the [Eucalyptus Cookbook attributes](https://github.com/eucalyptus/eucalyptus-cookbook/blob/testing/attributes/default.rb). Edit the etc/environment.yml file to match your deployment topology and configuration.
+
+### Validate
+#### Not yet implemented!!!
+In this stage we run validations against the configuration file to ensure that the deployment will succeed as we expect.
 
 ### Prepare
 This step ensures that Chef is installed on all servers and that we can SSH to all of them. It is nice to know that we are on good footing before we get going with the deployment.
@@ -34,7 +38,9 @@ Provisions the rest of the system or update the configuration of an existing sys
 
     euca-deploy provision -p <root-ssh-password-for-deployment-systems>
     
-    
+### Debug
+#### Not yet implemented!!!
+This step will grab all necessary information from a system in order to provide artifacts for use in debugging a problem.
     
     
     
