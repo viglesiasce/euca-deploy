@@ -76,7 +76,7 @@ class ChefManager():
             local('mkdir -p chef-repo/nodes')
 
     @staticmethod
-    def download_cookbooks(berksfile, chef_repo='chef-repo/cookbooks',
+    def download_cookbooks(berksfile, cookbook_path='chef-repo/cookbooks',
                            debug=False):
         info('Downloading Chef cookbooks')
         if debug:
@@ -84,8 +84,9 @@ class ChefManager():
         else:
             hidden_outputs = ['running', 'stdout', 'stderr']
         with hide(*hidden_outputs):
+            local('rm -rf {0}'.format(cookbook_path))
             local('berks vendor --berksfile {0} {1}'.format(berksfile,
-                                                            chef_repo))
+                                                            cookbook_path))
 
     def load_local_node_info(self, chef_repo_dir='chef-repo/'):
         for node_file in glob.glob(chef_repo_dir + 'nodes/*.json'):
