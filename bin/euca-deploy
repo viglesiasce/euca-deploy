@@ -13,10 +13,12 @@ if __name__ == '__main__':
     parser.add_argument('-c', '--config', default='etc/config.yml')
     parser.add_argument('-e', '--environment', default='etc/environment.yml')
     parser.add_argument('-p', '--password', default='foobar')
+    parser.add_argument('--debug', action='store_true', default=False)
     args = parser.parse_args()
     component_deployer = ComponentDeployer(args.password,
                                            args.environment,
-                                           args.config)
+                                           args.config,
+                                           args.debug)
     try:
         function = getattr(component_deployer, args.operation)
         function()
