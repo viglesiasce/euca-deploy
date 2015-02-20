@@ -28,24 +28,30 @@ class FailedToFindNodeException(Exception):
 class ChefManager():
     CHEF_VERSION = "11.16.4"
 
-    def __init__(self, password, environment_name, hosts):
+    def __init__(self, password, environment_name, hosts, debug=False):
         env.password = password
         env.user = 'root'
         env.parallel = True
         env.pool_size = 20
+        env.disable_known_hosts = True
         self.environment_name = environment_name
         self.current_path, self.folder_name = os.path.split(os.getcwd())
         self.remote_folder_path = '/root/' + self.folder_name + '/'
         self.ssh_opts = "-o StrictHostKeyChecking=no"
         self.node_hash = {}
-        with hide('running', 'stdout', 'stderr'):
+        self.hidden_outputs = ['running', 'stdout', 'stderr']
+        with hide(*self.hidden_outputs):
             self.local_hostname = local('hostname', capture=True)
             self.remote_hostnames = execute(run, 'hostname', hosts=hosts)
 
     @staticmethod
-    def sync_ssh_key(hosts):
+    def sync_ssh_key(hosts, debug=False):
         info('Syncing SSH keys with system under deployment')
-        with hide('running', 'stdout', 'stderr'):
+        if debug:
+            hidden_outputs = []
+        else:
+            hidden_outputs = ['running', 'stdout', 'stderr']
+        with hide(*hidden_outputs):
             pub_key = local('cat ' + os.path.expanduser("~/.ssh/id_rsa.pub"),
                             capture=True)
             cmd = ("yum install rsync -y --nogpg;"
@@ -58,17 +64,26 @@ class ChefManager():
             execute(run, cmd, hosts=hosts)
 
     @staticmethod
-    def create_chef_repo():
+    def create_chef_repo(debug=False):
         info('Creating Chef repository')
-        with hide('running', 'stdout', 'stderr'):
+        if debug:
+            hidden_outputs = []
+        else:
+            hidden_outputs = ['running', 'stdout', 'stderr']
+        with hide(*hidden_outputs):
             local('chef generate app chef-repo')
             local('mkdir -p chef-repo/environments')
             local('mkdir -p chef-repo/nodes')
 
     @staticmethod
-    def download_cookbooks(berksfile, chef_repo='chef-repo/cookbooks'):
+    def download_cookbooks(berksfile, chef_repo='chef-repo/cookbooks',
+                           debug=False):
         info('Downloading Chef cookbooks')
-        with hide('running', 'stdout', 'stderr'):
+        if debug:
+            hidden_outputs = []
+        else:
+            hidden_outputs = ['running', 'stdout', 'stderr']
+        with hide(*hidden_outputs):
             local('berks vendor --berksfile {0} {1}'.format(berksfile,
                                                             chef_repo))
 
@@ -154,7 +169,7 @@ class ChefManager():
                 run(chef_command + " -E " + self.environment_name)
 
     def push_deployment_data(self):
-        with hide('running', 'stdout', 'stderr'):
+        with hide(*self.hidden_outputs):
             info("rsyncing deployment data...")
             rsync_project(local_dir='./',
                     remote_dir=self.remote_folder_path,

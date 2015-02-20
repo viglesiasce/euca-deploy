@@ -9,26 +9,32 @@ from eucadeploy.chefmanager import ChefManager
 
 class ComponentDeployer():
     def __init__(self, password, environment_file='environment.yml',
-                 config_file='config.yml'):
+                 config_file='config.yml', debug=False):
         self.environment_file = environment_file
         self.config_file = config_file
         self.config = self.read_config()
         self.chef_repo_dir = 'chef-repo'
         ChefManager.create_chef_repo()
-        with hide('running'):
+        if debug:
+            self.hidden_outputs = []
+        else:
+            self.hidden_outputs = ['running', 'stdout', 'stderr']
+        with hide(*self.hidden_outputs):
             local('if [ ! -d eucalyptus-cookbook ]; then '
                   'git clone '
                   'https://github.com/eucalyptus/eucalyptus-cookbook;'
-                  'cd eucalyptus-cookbook; git checkout testing;'
+                  'cd eucalyptus-cookbook; git checkout euca-4.1;'
                   'fi')
         ChefManager.download_cookbooks('eucalyptus-cookbook/Berksfile',
                                        os.path.join(self.chef_repo_dir +
-                                                    '/cookbooks'))
+                                                    '/cookbooks'),
+                                       debug=debug)
         self.environment_name = self.write_json_environment()
         self.roles = self.generate_roles()
         self.all_hosts = self.roles['all']
         self.chef_manager = ChefManager(password, self.environment_name,
                                         self.roles['all'])
+
 
     def read_config(self):
         return yaml.load(open(self.config_file).read())
@@ -89,11 +95,11 @@ class ComponentDeployer():
                  self.chef_manager.run_chef_client,
                  self.chef_manager.pull_node_info]
         for method in order:
-            with hide('running', 'stdout', 'stderr'):
+            with hide(*self.hidden_outputs):
                 execute(method, hosts=self.all_hosts)
 
     def run_chef_on_hosts(self, hosts):
-        with hide('running', 'stdout', 'stderr'):
+        with hide(*self.hidden_outputs):
             execute(self.chef_manager.push_deployment_data, hosts=hosts)
         execute(self.chef_manager.run_chef_client, hosts=hosts)
         execute(self.chef_manager.pull_node_info, hosts=hosts)
