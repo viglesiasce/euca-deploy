@@ -24,8 +24,8 @@ class ComponentDeployer():
             local('if [ ! -d eucalyptus-cookbook ]; then '
                   'git clone '
                   'https://github.com/eucalyptus/eucalyptus-cookbook;'
-                  'cd eucalyptus-cookbook; git checkout {0};'
-                  'fi'.format(cookbook_branch))
+                  'fi')
+            local('cd eucalyptus-cookbook; git checkout {0};'.format(cookbook_branch))
         ChefManager.download_cookbooks('eucalyptus-cookbook/Berksfile',
                                        os.path.join(self.chef_repo_dir +
                                                     '/cookbooks'),
@@ -121,9 +121,10 @@ class ComponentDeployer():
             self.chef_manager.add_to_run_list(self.roles[component_name],
                                               self.get_recipe_list(
                                                   component_name))
-        self.chef_manager.add_to_run_list(self.roles['clc'],
-                                          self.get_recipe_list('configure'))
         self.run_chef_on_hosts(self.all_hosts)
+        clc = self.roles['clc']
+        self.chef_manager.add_to_run_list(clc, self.get_recipe_list('configure'))
+        self.run_chef_on_hosts(clc)
 
     def uninstall(self):
         self.chef_manager.clear_run_list(self.all_hosts)
