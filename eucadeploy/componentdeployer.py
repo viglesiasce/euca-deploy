@@ -73,7 +73,7 @@ class ComponentDeployer():
             roles['walrus']= [topology['walrus']]
             roles['all'].append(topology['walrus'])
         else:
-            del self.config['recipes'][2]
+            self.config['recipes'].remove({'walrus': ['eucalyptus::walrus']})
         for name in topology['clusters']:
             cc = topology['clusters'][name]['cc-1']
             sc = topology['clusters'][name]['sc-1']
