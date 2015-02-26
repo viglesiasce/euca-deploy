@@ -72,6 +72,8 @@ class ComponentDeployer():
         if topology.has_key('walrus'):
             roles['walrus']= [topology['walrus']]
             roles['all'].append(topology['walrus'])
+        else:
+            del self.config['recipes'][2]
         for name in topology['clusters']:
             cc = topology['clusters'][name]['cc-1']
             sc = topology['clusters'][name]['sc-1']
