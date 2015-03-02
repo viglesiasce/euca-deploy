@@ -121,8 +121,14 @@ class ComponentDeployer():
             self.chef_manager.add_to_run_list(self.roles[component_name],
                                               self.get_recipe_list(
                                                   component_name))
-        self.run_chef_on_hosts(self.all_hosts)
+        # We dont want to run configure on the CLC yet
         clc = self.roles['clc']
+        self.chef_manager.clear_run_list(clc)
+        self.chef_manager.add_to_run_list(clc, self.get_recipe_list(
+                                          'cloud-controller'))
+        self.run_chef_on_hosts(self.all_hosts)
+
+        # Now run configure on CLC only
         self.chef_manager.add_to_run_list(clc, self.get_recipe_list('configure'))
         self.run_chef_on_hosts(clc)
 
