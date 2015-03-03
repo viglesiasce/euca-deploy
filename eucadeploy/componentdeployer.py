@@ -67,7 +67,6 @@ class ComponentDeployer():
                  'cluster-controller': [], 'storage-controller': [],
                  'node-controller': [], 'vmware-broker': [], 'nuke': [],
                  'midolman': [], 'midonet-gw': [],
-                 'configure': [topology['clc-1']],
                  'all': [topology['clc-1']] + topology['user-facing']}
         if topology.has_key('walrus'):
             roles['walrus']= [topology['walrus']]
@@ -125,7 +124,7 @@ class ComponentDeployer():
                                                   component_name))
         self.run_chef_on_hosts(self.all_hosts)
         clc = self.roles['clc']
-        self.chef_manager.add_to_run_list(clc, self.get_recipe_list('configure'))
+        self.chef_manager.add_to_run_list(clc, ['eucalyptus::configure'])
         self.run_chef_on_hosts(clc)
 
     def uninstall(self):

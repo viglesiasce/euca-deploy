@@ -19,7 +19,5 @@ recipes:
     - midokura::midolman
   - midonet-gw:
     - midokura
-  - configure:
-    - eucalyptus::configure
   - nuke:
     - eucalyptus::nuke
