@@ -127,7 +127,7 @@ class ComponentDeployer():
         clc = self.roles['clc']
         self.chef_manager.clear_run_list(clc)
         self.chef_manager.add_to_run_list(clc, self.get_recipe_list(
-                                          'cloud-controller'))
+                                          'clc'))
         self.run_chef_on_hosts(self.all_hosts)
 
         # Now run configure on CLC only
