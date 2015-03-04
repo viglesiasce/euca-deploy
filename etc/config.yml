@@ -5,6 +5,7 @@ recipes:
     - eucalyptus::register-components
   - user-facing:
     - eucalyptus::user-facing
+    - eucalyptus::user-console
   - walrus:
     - eucalyptus::walrus
   - cluster-controller:
