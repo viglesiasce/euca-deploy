@@ -20,5 +20,6 @@ recipes:
     - midokura::midolman
   - midonet-gw:
     - midokura
+    - midokura::create-first-resources
   - nuke:
     - eucalyptus::nuke
