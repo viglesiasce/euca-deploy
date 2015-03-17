@@ -56,12 +56,18 @@ class ComponentDeployer():
                                       sort_keys=True, separators=(',', ': ')))
         return current_environment
 
-    def generate_roles(self):
+    def _get_environment(self):
         with open(self.chef_repo_dir + '/environments/' +
                 self.environment_name + '.json') as env_file:
-            env_dict = json.loads(env_file.read())
-            euca_attributes = env_dict['default_attributes']['eucalyptus']
-            topology = euca_attributes['topology']
+            return json.loads(env_file.read())
+
+    def _get_euca_attributes(self):
+        env_dict = self._get_environment()
+        return env_dict['default_attributes']['eucalyptus']
+
+    def generate_roles(self):
+        euca_attributes = self._get_euca_attributes()
+        topology = euca_attributes['topology']
         roles = {'clc': [topology['clc-1']],
                  'user-facing': topology['user-facing'],
                  'cluster-controller': [], 'storage-controller': [],
@@ -126,6 +132,11 @@ class ComponentDeployer():
         clc = self.roles['clc']
         self.chef_manager.add_to_run_list(clc, ['eucalyptus::configure'])
         self.run_chef_on_hosts(clc)
+        if self._get_euca_attributes()['network']['mode'] == 'VPCMIDO':
+            midonet_gw = self.roles['midonet-gw']
+            self.chef_manager.add_to_run_list(midonet_gw,
+                                              ['midokura::create-first-resources'])
+            self.run_chef_on_hosts(midonet_gw)
 
     def uninstall(self):
         self.chef_manager.clear_run_list(self.all_hosts)
