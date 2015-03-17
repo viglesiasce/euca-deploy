@@ -93,7 +93,7 @@ class ComponentDeployer():
         if euca_attributes['network']['mode'] == 'VPCMIDO':
             roles['midolman'] = roles['node-controller']
             roles['midonet-gw'] = roles['clc']
-            return roles
+        return roles
 
     def prepare(self):
         self.chef_manager.sync_ssh_key(self.all_hosts)
