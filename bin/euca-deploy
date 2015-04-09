@@ -1,12 +1,12 @@
-#!/usr/bin/python -u
+#!/usr/bin/env python -u
 import argparse
-import fabric
-
+from stevedore import driver, extension
 from eucadeploy.componentdeployer import ComponentDeployer
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('operation', choices=['prepare',
+    parser.add_argument('operation', choices=['validate',
+                                              'prepare',
                                               'bootstrap',
                                               'provision',
                                               'uninstall'])
@@ -14,15 +14,32 @@ if __name__ == '__main__':
     parser.add_argument('-e', '--environment', default='etc/environment.yml')
     parser.add_argument('-p', '--password', default='foobar')
     parser.add_argument('-b', '--branch', default='euca-4.1')
+    parser.add_argument('-d', '--driver', default="chef")
     parser.add_argument('--debug', action='store_true', default=False)
     args = parser.parse_args()
-    component_deployer = ComponentDeployer(args.password,
-                                           args.environment,
-                                           args.config,
-                                           args.debug,
-                                           args.branch)
+
+    component_deployer = ComponentDeployer(args.environment)
     try:
-        function = getattr(component_deployer, args.operation)
-        function()
+        if args.operation == 'validate':
+            mgr = extension.ExtensionManager(
+                namespace='eucadeploy.validator',
+                invoke_args=(component_deployer,),
+                invoke_on_load=True,
+                propagate_map_exceptions=True
+            )
+            results = mgr.map_method('validate')
+        else:
+            mgr = driver.DriverManager(
+                namespace='eucadeploy.deployer',
+                name=args.driver,
+                invoke_on_load=True,
+                invoke_args=(args.password,
+                             args.environment,
+                             args.config,
+                             args.debug,
+                             args.branch),
+            )
+            function = getattr(mgr.driver, args.operation)
+            function()
     finally:
-        fabric.network.disconnect_all()
+        pass  # fabric.network.disconnect_all()

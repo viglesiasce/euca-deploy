@@ -21,7 +21,7 @@ setup(
     packages=find_packages(),
     test_suite='nose.collector',
     tests_require=['nose'],
-    install_requires=['fabric', 'PyYaml', 'argparse'],
+    install_requires=['fabric', 'PyYaml', 'argparse', 'stevedore'],
     scripts=['bin/euca-deploy'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
@@ -38,4 +38,13 @@ setup(
         'Topic :: System :: Clustering',
         'Topic :: System :: Systems Administration',
     ],
+    entry_points={
+        'eucadeploy.deployer': [
+            'chef = eucadeploy.plugins.deployer.chef:Chef'
+        ],
+        'eucadeploy.validator': [
+            'pinghosts = eucadeploy.plugins.validator.pinghosts:PingHosts',
+            'topology = eucadeploy.plugins.validator.topology:Topology'
+        ]
+    }
 )
