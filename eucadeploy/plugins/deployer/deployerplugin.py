@@ -10,7 +10,7 @@ class DeployerPlugin(object):
     """
 
     @abc.abstractmethod
-    def prepare(self, roles):
+    def prepare(self):
         """Format the data and return unicode text.
 
         :param data: A dictionary with string keys and simple types as
@@ -20,7 +20,7 @@ class DeployerPlugin(object):
         """
 
     @abc.abstractmethod
-    def bootstrap(self, roles):
+    def bootstrap(self):
         """Format the data and return unicode text.
 
         :param data: A dictionary with string keys and simple types as
@@ -30,7 +30,7 @@ class DeployerPlugin(object):
         """
 
     @abc.abstractmethod
-    def provision(self, roles):
+    def provision(self):
         """Format the data and return unicode text.
 
         :param data: A dictionary with string keys and simple types as
@@ -40,7 +40,7 @@ class DeployerPlugin(object):
         """
 
     @abc.abstractmethod
-    def uninstall(self, roles):
+    def uninstall(self):
         """Format the data and return unicode text.
 
         :param data: A dictionary with string keys and simple types as

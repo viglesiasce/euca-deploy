@@ -9,6 +9,7 @@ if __name__ == '__main__':
                                               'prepare',
                                               'bootstrap',
                                               'provision',
+                                              'debug',
                                               'uninstall'])
     parser.add_argument('-c', '--config', default='etc/config.yml')
     parser.add_argument('-e', '--environment', default='etc/environment.yml')
@@ -27,7 +28,15 @@ if __name__ == '__main__':
                 invoke_on_load=True,
                 propagate_map_exceptions=True
             )
-            results = mgr.map_method('validate')
+            results = mgr.map_method(args.operation)
+        elif args.operation == 'debug':
+            mgr = extension.ExtensionManager(
+                namespace='eucadeploy.debugger',
+                invoke_args=(component_deployer,),
+                invoke_on_load=True,
+                propagate_map_exceptions=True
+            )
+            results = mgr.map_method(args.operation)
         else:
             mgr = driver.DriverManager(
                 namespace='eucadeploy.deployer',

@@ -45,6 +45,9 @@ setup(
         'eucadeploy.validator': [
             'pinghosts = eucadeploy.plugins.validator.pinghosts:PingHosts',
             'topology = eucadeploy.plugins.validator.topology:Topology'
+        ],
+        'eucadeploy.debugger': [
+            'check_ports = eucadeploy.plugins.debugger.check_ports:CheckPorts'
         ]
     }
 )
