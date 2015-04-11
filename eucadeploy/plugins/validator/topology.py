@@ -31,14 +31,11 @@ class Topology(ValidatorPlugin):
                     if host in cluster:
                         appearances.append(cluster)
                 if len(appearances) > 1:
-                    self.failure(
-                        "Found " + host + " in multiple clusters: " + str(
+                    raise AssertionError("Found " + host + " in multiple clusters: " + str(
                             appearances))
-                    self.failed_hosts.append(host)
                 else:
                     self.success(host + " only in 1 cluster")
                     self.good_hosts.append(host)
-        self.report(len(self.failed_hosts), len(self.good_hosts))
 
 
 

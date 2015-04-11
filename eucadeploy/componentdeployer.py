@@ -4,7 +4,8 @@ import yaml
 class ComponentDeployer():
     def __init__(self, environment_file='environment.yml'):
         self.environment_file = environment_file
-        self.all_hosts = self.get_roles()['all']
+        self.roles = self.get_roles()
+        self.all_hosts = self.roles['all']
 
     def read_environment(self):
         return yaml.load(open(self.environment_file).read())
