@@ -47,7 +47,10 @@ setup(
             'topology = eucadeploy.plugins.validator.topology:Topology'
         ],
         'eucadeploy.debugger': [
-            'check_ports = eucadeploy.plugins.debugger.check_ports:CheckPorts'
+            'check_ports = eucadeploy.plugins.debugger.check_ports:CheckPorts',
+            'debug_cloud_controller = eucadeploy.plugins.debugger.debug_cloud_controller:DebugCloudController',
+            'debug_node_controller = eucadeploy.plugins.debugger.debug_node_controller:DebugNodeController',
+            'debug_cluster_controller = eucadeploy.plugins.debugger.debug_cluster_controller:DebugClusterController'
         ]
     }
 )

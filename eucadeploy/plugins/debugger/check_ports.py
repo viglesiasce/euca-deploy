@@ -1,10 +1,12 @@
+from fabric.context_managers import hide
 import re
 from eucadeploy.plugins.debugger.debuggerplugin import DebuggerPlugin
 
 class CheckPorts(DebuggerPlugin):
     def debug(self):
         all_hosts = self.component_deployer.all_hosts
-        ports = self.run_command_on_hosts('netstat -lnp', all_hosts)
+        with hide('everything'):
+            ports = self.run_command_on_hosts('netstat -lnp', all_hosts)
         roles = self.component_deployer.get_roles()
         clc_ports = {'tcp': [8773, 8777, 53, 8443, 8779],
                      'udp': [53, 7500, 18778]}
@@ -34,14 +36,13 @@ class CheckPorts(DebuggerPlugin):
                                      'not open on host ' + host + '\n' +
                                      str(closed_ports))
 
-
     def _check_port(self, netstat, proto, port, host):
         port_string = proto + '.*:' + str(port)
         search = re.search(port_string, netstat)
         if search:
-            self.success(host + ' - Open ' + port_string)
+            self.success(host + ': Open ' + port_string)
             return True
         else:
-            self.failure(host + ' - Closed ' + port_string)
+            self.failure(host + ': Closed ' + port_string)
             return False
 
