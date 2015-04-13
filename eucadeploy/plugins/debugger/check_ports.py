@@ -35,6 +35,7 @@ class CheckPorts(DebuggerPlugin):
                 raise AssertionError('Required ports '
                                      'not open on host ' + host + '\n' +
                                      str(closed_ports))
+        return (self.passed, self.failed)
 
     def _check_port(self, netstat, proto, port, host):
         port_string = proto + '.*:' + str(port)

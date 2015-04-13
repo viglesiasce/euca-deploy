@@ -14,3 +14,4 @@ class DebugClusterController(DebuggerPlugin):
                 self.success(cc + ': CC service running')
             else:
                 self.failure(cc + ': CC service not running')
+        return (self.passed, self.failed)

@@ -19,3 +19,4 @@ class DebugNodeController(DebuggerPlugin):
                 self.success(node + ': libvirt service running')
             else:
                 self.failure(node + ': libvirt service not running')
+        return (self.passed, self.failed)

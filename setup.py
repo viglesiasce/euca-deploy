@@ -40,17 +40,26 @@ setup(
     ],
     entry_points={
         'eucadeploy.deployer': [
-            'chef = eucadeploy.plugins.deployer.chef:Chef'
+            'chef = eucadeploy.plugins.deployer.'
+            'chef:Chef'
         ],
         'eucadeploy.validator': [
-            'pinghosts = eucadeploy.plugins.validator.pinghosts:PingHosts',
-            'topology = eucadeploy.plugins.validator.topology:Topology'
+            'pinghosts = eucadeploy.plugins.validator.'
+            'pinghosts:PingHosts',
+            'topology = eucadeploy.plugins.validator.'
+            'topology:Topology'
         ],
         'eucadeploy.debugger': [
-            'check_ports = eucadeploy.plugins.debugger.check_ports:CheckPorts',
-            'debug_cloud_controller = eucadeploy.plugins.debugger.debug_cloud_controller:DebugCloudController',
-            'debug_node_controller = eucadeploy.plugins.debugger.debug_node_controller:DebugNodeController',
-            'debug_cluster_controller = eucadeploy.plugins.debugger.debug_cluster_controller:DebugClusterController'
+            'check_ports = eucadeploy.plugins.debugger.'
+            'check_ports:CheckPorts',
+            'debug_cloud_controller = eucadeploy.plugins.debugger.'
+            'debug_cloud_controller:DebugCloudController',
+            'debug_node_controller = eucadeploy.plugins.debugger.'
+            'debug_node_controller:DebugNodeController',
+            'debug_cluster_controller = eucadeploy.plugins.debugger.'
+            'debug_cluster_controller:DebugClusterController',
+            'file_permissions = eucadeploy.plugins.debugger.'
+            'file_permissions:FilePermissions'
         ]
     }
 )

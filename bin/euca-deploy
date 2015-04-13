@@ -1,5 +1,6 @@
 #!/usr/bin/env python -u
 import argparse
+from fabric.colors import yellow
 from stevedore import driver, extension
 from eucadeploy.componentdeployer import ComponentDeployer
 
@@ -20,35 +21,40 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     component_deployer = ComponentDeployer(args.environment)
-    try:
-        if args.operation == 'validate':
-            mgr = extension.ExtensionManager(
-                namespace='eucadeploy.validator',
-                invoke_args=(component_deployer,),
-                invoke_on_load=True,
-                propagate_map_exceptions=True
-            )
-            results = mgr.map_method(args.operation)
-        elif args.operation == 'debug':
-            mgr = extension.ExtensionManager(
-                namespace='eucadeploy.debugger',
-                invoke_args=(component_deployer,),
-                invoke_on_load=True,
-                propagate_map_exceptions=True
-            )
-            results = mgr.map_method(args.operation)
-        else:
-            mgr = driver.DriverManager(
-                namespace='eucadeploy.deployer',
-                name=args.driver,
-                invoke_on_load=True,
-                invoke_args=(args.password,
-                             args.environment,
-                             args.config,
-                             args.debug,
-                             args.branch),
-            )
-            function = getattr(mgr.driver, args.operation)
-            function()
-    finally:
-        pass  # fabric.network.disconnect_all()
+    if args.operation == 'validate':
+        mgr = extension.ExtensionManager(
+            namespace='eucadeploy.validator',
+            invoke_args=(component_deployer,),
+            invoke_on_load=True,
+            propagate_map_exceptions=True
+        )
+        results = mgr.map_method(args.operation)
+    elif args.operation == 'debug':
+        mgr = extension.ExtensionManager(
+            namespace='eucadeploy.debugger',
+            invoke_args=(component_deployer,),
+            invoke_on_load=True,
+            propagate_map_exceptions=False
+        )
+        results = mgr.map_method(args.operation)
+        total_failures = 0
+        total_passed = 0
+        for passed, failed in results:
+            total_passed += passed
+            total_failures += failed
+        print yellow('Total passed: ' + str(total_passed))
+        print yellow('Total failed: ' + str(total_failures))
+        exit(total_failures)
+    else:
+        mgr = driver.DriverManager(
+            namespace='eucadeploy.deployer',
+            name=args.driver,
+            invoke_on_load=True,
+            invoke_args=(args.password,
+                         args.environment,
+                         args.config,
+                         args.debug,
+                         args.branch),
+        )
+        function = getattr(mgr.driver, args.operation)
+        function()
