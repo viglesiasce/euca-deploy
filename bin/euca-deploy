@@ -14,7 +14,7 @@ if __name__ == '__main__':
     parser.add_argument('-e', '--environment', default='etc/environment.yml')
     parser.add_argument('-p', '--password', default='foobar')
     parser.add_argument('-b', '--branch', default='euca-4.1')
-    parser.add_argument('-C', '--cookbook', default='https://github.com/eucalyptus/eucalyptus-cookbook')
+    parser.add_argument('--cookbook-repo', default='https://github.com/eucalyptus/eucalyptus-cookbook')
     parser.add_argument('--debug', action='store_true', default=False)
     args = parser.parse_args()
     component_deployer = ComponentDeployer(args.password,
@@ -22,7 +22,7 @@ if __name__ == '__main__':
                                            args.config,
                                            args.debug,
                                            args.branch,
-                                           args.cookbook)
+                                           args.cookbook_repo)
     try:
         function = getattr(component_deployer, args.operation)
         function()
