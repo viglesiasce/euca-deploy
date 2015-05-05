@@ -16,7 +16,6 @@ class ComponentDeployer():
         self.config_file = config_file
         self.config = self.read_config()
         self.chef_repo_dir = 'chef-repo'
-        self.cookbook_dir = cookbook.rsplit('/',1)[1]
         ChefManager.create_chef_repo()
         if debug:
             self.hidden_outputs = []
