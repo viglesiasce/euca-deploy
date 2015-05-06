@@ -10,7 +10,8 @@ from eucadeploy.chefmanager import ChefManager
 class ComponentDeployer():
     def __init__(self, password, environment_file='environment.yml',
                  config_file='config.yml', debug=False,
-                 cookbook_branch='euca-4.1'):
+                 cookbook_branch='euca-4.1',
+                 cookbook_repo='https://github.com/eucalyptus/eucalyptus-cookbook'):
         self.environment_file = environment_file
         self.config_file = config_file
         self.config = self.read_config()
@@ -23,9 +24,10 @@ class ComponentDeployer():
         with hide(*self.hidden_outputs):
             local('if [ ! -d eucalyptus-cookbook ]; then '
                   'git clone '
-                  'https://github.com/eucalyptus/eucalyptus-cookbook;'
-                  'fi')
+                  '{0} eucalyptus-cookbook;'
+                  'fi'.format(cookbook_repo))
             local('cd eucalyptus-cookbook; git checkout {0};'.format(cookbook_branch))
+            local('cd eucalyptus-cookbook; git pull;')
         ChefManager.download_cookbooks('eucalyptus-cookbook/Berksfile',
                                        os.path.join(self.chef_repo_dir +
                                                     '/cookbooks'),
