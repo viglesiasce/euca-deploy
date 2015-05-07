@@ -6,6 +6,7 @@ from eucadeploy.componentdeployer import ComponentDeployer
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    default_repo = 'https://github.com/eucalyptus/eucalyptus-cookbook'
     parser.add_argument('operation', choices=['validate',
                                               'prepare',
                                               'bootstrap',
@@ -16,6 +17,8 @@ if __name__ == '__main__':
     parser.add_argument('-e', '--environment', default='etc/environment.yml')
     parser.add_argument('-p', '--password', default='foobar')
     parser.add_argument('-b', '--branch', default='euca-4.1')
+    parser.add_argument('--cookbook-repo',
+                        default=default_repo)
     parser.add_argument('-d', '--driver', default="chef")
     parser.add_argument('--debug', action='store_true', default=False)
     args = parser.parse_args()
