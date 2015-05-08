@@ -8,10 +8,11 @@ from eucadeploy.chefmanager import ChefManager
 import os
 from eucadeploy.componentdeployer import ComponentDeployer
 
-class Chef(DeployerPlugin):
 
+class Chef(DeployerPlugin):
     def __init__(self, password, environment_file='etc/environment.yml',
-                 config_file='config.yml', debug=False, branch='euca-4.1'):
+                 config_file='config.yml', debug=False, branch='euca-4.1',
+                 repo='https://github.com/eucalyptus/eucalyptus-cookbook'):
         self.chef_repo_dir = 'chef-repo'
         self.environment_file = environment_file
         if debug:
@@ -22,20 +23,21 @@ class Chef(DeployerPlugin):
         self.roles = component_deployer.get_roles()
         self.all_hosts = self.roles['all']
         self.environment_name = self._write_json_environment()
-        self._prepare_fs(branch, debug)
+        self._prepare_fs(repo, branch, debug)
         self.chef_manager = ChefManager(password, self.environment_name,
                                         self.roles['all'])
         self.config_file = config_file
         self.config = self.read_config()
 
-    def _prepare_fs(self, branch, debug):
+    def _prepare_fs(self, repo, branch, debug):
         ChefManager.create_chef_repo()
         with hide(*self.hidden_outputs):
             local('if [ ! -d eucalyptus-cookbook ]; then '
                   'git clone '
-                  'https://github.com/eucalyptus/eucalyptus-cookbook;'
-                  'fi')
+                  '{0} eucalyptus-cookbook;'
+                  'fi'.format(repo))
             local('cd eucalyptus-cookbook; git checkout {0};'.format(branch))
+            local('cd eucalyptus-cookbook; git pull;')
         ChefManager.download_cookbooks('eucalyptus-cookbook/Berksfile',
                                        os.path.join(self.chef_repo_dir +
                                                     '/cookbooks'),
@@ -46,7 +48,7 @@ class Chef(DeployerPlugin):
 
     def _get_recipe_list(self, component):
         for recipe_dict in self.config['recipes']:
-            if recipe_dict.has_key(component):
+            if component in recipe_dict:
                 return recipe_dict[component]
         raise ValueError('No component found for: ' + component)
 
@@ -62,7 +64,7 @@ class Chef(DeployerPlugin):
 
     def _get_environment(self):
         with open(self.chef_repo_dir + '/environments/' +
-                self.environment_name + '.json') as env_file:
+                  self.environment_name + '.json') as env_file:
             return json.loads(env_file.read())
 
     def _run_chef_on_hosts(self, hosts):
@@ -104,8 +106,9 @@ class Chef(DeployerPlugin):
         self._run_chef_on_hosts(clc)
         if self._get_euca_attributes()['network']['mode'] == 'VPCMIDO':
             midonet_gw = self.roles['midonet-gw']
+            create_resources = 'midokura::create-first-resources'
             self.chef_manager.add_to_run_list(midonet_gw,
-                                              ['midokura::create-first-resources'])
+                                              [create_resources])
             self._run_chef_on_hosts(midonet_gw)
 
     def uninstall(self):
