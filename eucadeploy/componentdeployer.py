@@ -10,14 +10,14 @@ class ComponentDeployer():
     def read_environment(self):
         return yaml.load(open(self.environment_file).read())
 
-    def _get_euca_attributes(self):
+    def get_euca_attributes(self):
         env_dict = self.read_environment()
         return env_dict['default_attributes']['eucalyptus']
 
     def get_roles(self):
-        euca_attributes = self._get_euca_attributes()
+        euca_attributes = self.get_euca_attributes()
         topology = euca_attributes['topology']
-        if not 'clc-1' in topology:
+        if 'clc-1' not in topology:
             raise IndexError("Unable to find CLC in topology")
         roles = {'clc': {topology['clc-1']},
                  'user-facing': set(topology['user-facing']),
@@ -25,14 +25,15 @@ class ComponentDeployer():
                  'node-controller': set(), 'vmware-broker': set(), 'nuke': set(),
                  'midolman': set(), 'midonet-gw': set(),
                  'all': {topology['clc-1']}
-        }
+                 }
         for ufs in topology['user-facing']:
             roles['all'].add(ufs)
         if 'walrus' in topology:
             roles['walrus'] = {topology['walrus']}
             roles['all'].add(topology['walrus'])
         else:
-            self.config['recipes'].remove({'walrus': ['eucalyptus::walrus']})
+            # No walrus defined assuming RiakCS
+            roles['walrus'] = {}
         for name in topology['clusters']:
             roles['cluster'] = {}
             if 'cc-1' in topology['clusters'][name]:

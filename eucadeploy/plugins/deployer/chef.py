@@ -19,8 +19,8 @@ class Chef(DeployerPlugin):
             self.hidden_outputs = []
         else:
             self.hidden_outputs = ['running', 'stdout', 'stderr']
-        component_deployer = ComponentDeployer(environment_file)
-        self.roles = component_deployer.get_roles()
+        self.component_deployer = ComponentDeployer(environment_file)
+        self.roles = self.component_deployer.get_roles()
         self.all_hosts = self.roles['all']
         self.environment_name = self._write_json_environment()
         self._prepare_fs(repo, branch, debug)
@@ -104,7 +104,7 @@ class Chef(DeployerPlugin):
         clc = self.roles['clc']
         self.chef_manager.add_to_run_list(clc, ['eucalyptus::configure'])
         self._run_chef_on_hosts(clc)
-        if self._get_euca_attributes()['network']['mode'] == 'VPCMIDO':
+        if self.component_deployer.get_euca_attributes()['network']['mode'] == 'VPCMIDO':
             midonet_gw = self.roles['midonet-gw']
             create_resources = 'midokura::create-first-resources'
             self.chef_manager.add_to_run_list(midonet_gw,
