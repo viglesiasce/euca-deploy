@@ -59,7 +59,9 @@ setup(
             'debug_cluster_controller = eucadeploy.plugins.debugger.'
             'debug_cluster_controller:DebugClusterController',
             'file_permissions = eucadeploy.plugins.debugger.'
-            'file_permissions:FilePermissions'
+            'file_permissions:FilePermissions',
+            'eucalyptus_sosreports = eucadeploy.plugins.debugger.'
+            'eucalyptus_sosreports:EucalyptusSosReports'
         ]
     }
 )
