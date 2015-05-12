@@ -44,10 +44,12 @@ setup(
             'chef:Chef'
         ],
         'eucadeploy.validator': [
-            'pinghosts = eucadeploy.plugins.validator.'
-            'pinghosts:PingHosts',
+#            'pinghosts = eucadeploy.plugins.validator.'
+#            'pinghosts:PingHosts',
             'topology = eucadeploy.plugins.validator.'
-            'topology:Topology'
+            'topology:Topology',
+            'repos = eucadeploy.plugins.validator.'
+            'repos:Repos'
         ],
         'eucadeploy.debugger': [
             'check_ports = eucadeploy.plugins.debugger.'
