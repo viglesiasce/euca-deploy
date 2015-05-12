@@ -1,36 +1,23 @@
 from eucadeploy.plugins.validator.validatorplugin import ValidatorPlugin
-import urllib2
+from urllib2 import Request, urlopen, URLError
 
 
 class Repos(ValidatorPlugin):
     def validate(self):
         self.repos = [self.environment['default_attributes']['eucalyptus']['enterprise-repo']]
+        self.repos += [self.environment['default_attributes']['eucalyptus']['default-img-url']]
+        self.repos += [self.environment['default_attributes']['eucalyptus']['euca2ools-repo']]
+        self.repos += [self.environment['default_attributes']['eucalyptus']['eucalyptus-repo']]
         self.repos += [self.environment['default_attributes']['eucalyptus']['init-script-url']]
-#        print self.repos
         for url in self.repos:
-            print "URL: " + str(url)
-            from urllib2 import Request, urlopen, URLError
             req = Request(url)
             try:
                 response = urlopen(req)
             except URLError, e:
-            if hasattr(e, 'reason'):
-                print 'We failed to reach a server.'
-                print 'Reason: ', e.reason
-                return False
-            elif hasattr(e, 'code'):
-                print 'The server couldn\'t fulfill the request.'
-                print 'Error code: ', e.code
-                return False
+                if hasattr(e, 'reason'):
+                    raise AssertionError("INVALID URL: " + str(url) + "  " + str(e.reason))
+                elif hasattr(e, 'code'):
+                    raise AssertionError("INVALID REQUEST: " + url + "  " + str(e.reason))
             else:
                 # everything is fine
-                print "Success!"
-                return True
-
-
-#    def _ping(self, host, count=1):
-#        exit_code = os.system('ping -c {0} {1}'.format(count, host))
-#        if exit_code != 0:
-#            return False
-#        else:
-#            return True
+                self.success('URL: ' + url + ' is valid and reachable!')
