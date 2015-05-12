@@ -19,21 +19,21 @@ class ComponentDeployer():
         topology = euca_attributes['topology']
         if 'clc-1' not in topology:
             raise IndexError("Unable to find CLC in topology")
-        roles = {'clc': {topology['clc-1']},
+        roles = {'clc': set([topology['clc-1']]),
                  'user-facing': set(topology['user-facing']),
                  'cluster-controller': set(), 'storage-controller': set(),
                  'node-controller': set(), 'vmware-broker': set(), 'nuke': set(),
                  'midolman': set(), 'midonet-gw': set(),
-                 'all': {topology['clc-1']}
+                 'all': set([topology['clc-1']])
                  }
         for ufs in topology['user-facing']:
             roles['all'].add(ufs)
         if 'walrus' in topology:
-            roles['walrus'] = {topology['walrus']}
+            roles['walrus'] = set([topology['walrus']])
             roles['all'].add(topology['walrus'])
         else:
             # No walrus defined assuming RiakCS
-            roles['walrus'] = {}
+            roles['walrus'] = set()
         for name in topology['clusters']:
             roles['cluster'] = {}
             if 'cc-1' in topology['clusters'][name]:
@@ -48,7 +48,7 @@ class ComponentDeployer():
             else:
                 raise IndexError("Unable to find SC in topology for cluster " + name)
 
-            roles['cluster'][name] = {cc, sc}
+            roles['cluster'][name] = set([cc, sc])
             if 'nodes' in topology['clusters'][name]:
                 nodes = topology['clusters'][name]['nodes'].split()
             else:
