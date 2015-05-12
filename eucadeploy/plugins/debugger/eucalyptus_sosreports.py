@@ -47,10 +47,8 @@ class EucalyptusSosReports(DebuggerPlugin):
         for output in sosreport_output.split('\n'):
             sosreport_file = re.search(hostname, output, re.I)
             if sosreport_file:
-                import pdb; pdb.set_trace()
                 self.success(host + ':sosreport finished - '
                             + output)
-                remote = output.strip()
-                local = remote.split('/')[2]
-                cp_output = self.run_copy_task(remote, local, host)
+                remote_sosreport = output.strip()
+                cp_output = self.get_command_on_host(remote_sosreport, host)
 

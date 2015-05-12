@@ -3,7 +3,7 @@ import abc
 import fabric
 from fabric.colors import red, green, cyan, yellow
 from fabric.decorators import task
-from fabric.operations import run
+from fabric.operations import run, get
 from fabric.state import env
 from fabric.tasks import execute
 import six
@@ -60,11 +60,16 @@ class DebuggerPlugin(object):
         env.parallel = True
         return run(command)
 
-    def run_copy_task(remote_path, local_path, hosts, user='root', password='foobar'):
+    def get_command_task(remote_path, user='root', password='foobar'):
         env.user = user
         env.password = password
         env.parallel = True
-        return get(remote_path, local_path)
+        #print("Executing on %(host)s as %(user)s with %(password)s" % env)
+        #pass
+        return get(remote_path)
+
+    def get_command_on_host(self, remote_path, host):
+        return execute(self.get_command_task, remote_path=remote_path, host=host)[host]
 
     def run_command_on_hosts(self, command, hosts, host=None):
         return execute(self.run_command_task, command=command, hosts=hosts)
