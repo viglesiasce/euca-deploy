@@ -1,9 +1,9 @@
 # stevedore/example/base.py
 import abc
 import fabric
-from fabric.colors import red, green, cyan, yellow
+from fabric.colors import red, green, cyan, yellow, white
 from fabric.decorators import task
-from fabric.operations import run, get
+from fabric.operations import run, get, settings
 from fabric.state import env
 from fabric.tasks import execute
 import six
@@ -46,12 +46,10 @@ class DebuggerPlugin(object):
             text_color = cyan
         print text_color(self.message_style.format('DEBUG RESULTS',
                                              "Name: {0} Passed: "
-                                             "{1} Warnings: {2}  "
-                                             "Failed: {3}".format(
-                                                 self.name,
-                                                 str(self.passed),
-                                                 str(self.warnings),
-                                                 str(self.failed))))
+                                             "{1} Failed: {2}".format(
+                                              self.name,
+                                              str(self.passed),
+                                              str(self.failed))))
 
     @task
     def run_command_task(command, user='root', password='foobar'):
@@ -60,16 +58,33 @@ class DebuggerPlugin(object):
         env.parallel = True
         return run(command)
 
-    def get_command_task(remote_path, user='root', password='foobar'):
+    @task
+    def sosreport_command_task(command, user='root', password='foobar'):
         env.user = user
         env.password = password
         env.parallel = True
-        #print("Executing on %(host)s as %(user)s with %(password)s" % env)
-        #pass
-        return get(remote_path)
+        hostname = env.host.replace(".", "_")
+        message = "Running sosreport on " + env.host
+        message_style = "[{0: <20}] {1}"
+        print white(message_style.format('INFO', message))
+        sosreport_command = (command + " --name=" + hostname
+                            + " --ticket-number=000 "
+                            + "--batch")
+        return run(sosreport_command)
 
-    def get_command_on_host(self, remote_path, host):
-        return execute(self.get_command_task, remote_path=remote_path, host=host)[host]
+    @task
+    def get_command_task(remote_path, local_path, user='root', password='foobar'):
+        env.user = user
+        env.password = password
+        env.parallel = True
+        return get(remote_path, local_path)
+
+    def get_command_on_host(self, remote_path, local_path, host):
+        return execute(self.get_command_task, remote_path=remote_path,
+                       local_path=local_path, host=host)[host]
+
+    def execute_sosreports_on_hosts(self, command, hosts, host=None):
+        return execute(self.sosreport_command_task, command=command, hosts=hosts)
 
     def run_command_on_hosts(self, command, hosts, host=None):
         return execute(self.run_command_task, command=command, hosts=hosts)
