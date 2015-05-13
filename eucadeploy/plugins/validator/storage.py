@@ -3,7 +3,9 @@ from eucadeploy.plugins.validator.validatorplugin import ValidatorPlugin
 class Storage(ValidatorPlugin):
     def validate(self):
         self.topology = self.environment['default_attributes']['eucalyptus']['topology']
-        self.systemproperties = self.environment['default_attributes']['eucalyptus']['system-properties']
+        self.enveuca = self.environment['default_attributes']['eucalyptus']
+        if 'system-properties' in self.enveuca:
+            self.systemproperties = self.environment['default_attributes']['eucalyptus']['system-properties']
         for name in self.topology['clusters'].keys():
             if 'storage-backend' in self.topology['clusters'][name]:
                 if 'netapp' in self.topology['clusters'][name]['storage-backend']:
