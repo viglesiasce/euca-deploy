@@ -40,7 +40,7 @@ Provisions the rest of the system or update the configuration of an existing sys
     
 ### Debug
 This step will grab all necessary information from a system in order to provide artifacts for use in debugging a problem.  In addition, this step will do the following:
-* Confirm/install (sosreports)[https://github.com/sosreport/sos] and (eucalyptus sosreports plugin)[https://github.com/eucalyptus/eucalyptus-sosreport-plugins] on each node
+* Confirm/install [sosreports](https://github.com/sosreport/sos) and [eucalyptus sosreports plugin](https://github.com/eucalyptus/eucalyptus-sosreport-plugins) on each node
 * Run sosreports on each node
 * Copy the sosreport back to the local client
 ```
