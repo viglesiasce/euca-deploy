@@ -12,8 +12,8 @@ class Storage(ValidatorPlugin):
                                     name + '.storage.sanhost', name + '.storage.sanpassword', name + '.storage.sanuser',
                                     name + '.storage.vservername']
                     for val in netapp_props:
-                        assert self.systemproperties[val]
-                        self.success('Netapp system property ' + val + ' is valid.')
-
-
-#                    raise AssertionError("Netapp system property " + name + '.storage.chapuser is invalid')
+                        try:
+                           assert val in self.systemproperties
+                           self.success('Netapp system property ' + val + ' is valid.')
+                        except AssertionError, e:
+                           self.failure('Netapp system property ' + val + ' is missing or invalid')
