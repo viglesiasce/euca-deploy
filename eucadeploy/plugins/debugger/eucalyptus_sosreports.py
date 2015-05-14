@@ -1,3 +1,9 @@
+import fabric
+from fabric.colors import white
+from fabric.decorators import task
+from fabric.operations import run
+from fabric.state import env
+from fabric.tasks import execute
 from fabric.context_managers import hide
 import re
 from eucadeploy.plugins.debugger.debuggerplugin import DebuggerPlugin
@@ -65,16 +71,15 @@ class EucalyptusSosReports(DebuggerPlugin):
             """
             Execute sosreport on all hosts
             """
-            sosreport_output = self.execute_sosreports_on_hosts('sosreport ',
-                                                                hosts=all_hosts)
+            sosreport_output = self.execute_sosreports_on_hosts(hosts=all_hosts)
         for host in all_hosts:
             """
             Confirm sosreport ran successfully;
             Download sosreport to local client
             """
             hostname = host.replace(".", '')
+            sosfile = 'sosreport-' + hostname
             for output in sosreport_output[host].split('\n'):
-                sosfile = 'sosreport-' + hostname
                 sosreport_file = re.search(sosfile, output, re.I)
                 if sosreport_file:
                     self.success(host + ':sosreport finished - '
@@ -83,7 +88,7 @@ class EucalyptusSosReports(DebuggerPlugin):
                     local_path = remote_path.split('/')[2]
                     format_host = host.replace(".", "_")
                     with hide('everything'):
-                        cp_output = self.get_command_on_host(remote_path,
+                        cp_output = self.get_file_on_host(remote_path,
                                                              format_host
                                                              + "-"
                                                              + local_path,
@@ -94,3 +99,20 @@ class EucalyptusSosReports(DebuggerPlugin):
                     else:
                         self.failure(host + ':sosreport failed to download - '
                                     + local_path)
+
+    @task
+    def sosreport_command_task(user='root', password='foobar'):
+        env.user = user
+        env.password = password
+        env.parallel = True
+        hostname = env.host.replace(".", "_")
+        message = 'Running sosreport on ' + env.host
+        message_style = "[{0: <20}] {1}"
+        print white(message_style.format('INFO', message))
+        sosreport_command = ("sosreport --name=" + hostname
+                            + " --ticket-number=000 "
+                            + "--batch")
+        return run(sosreport_command)
+
+    def execute_sosreports_on_hosts(self, hosts, host=None):
+        return execute(self.sosreport_command_task, hosts=hosts)

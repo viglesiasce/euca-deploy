@@ -36,6 +36,9 @@ class DebuggerPlugin(object):
         self.failed +=1
         print red(self.message_style.format('DEBUG FAILED', message))
 
+    def info(self, message):
+        print white(self.message_style.format('INFO', message))
+
     def warning(self, message):
         self.warnings +=1
         print yellow(self.message_style.format('DEBUG WARNING', message))
@@ -59,32 +62,15 @@ class DebuggerPlugin(object):
         return run(command)
 
     @task
-    def sosreport_command_task(command, user='root', password='foobar'):
-        env.user = user
-        env.password = password
-        env.parallel = True
-        hostname = env.host.replace(".", "_")
-        message = "Running sosreport on " + env.host
-        message_style = "[{0: <20}] {1}"
-        print white(message_style.format('INFO', message))
-        sosreport_command = (command + " --name=" + hostname
-                            + " --ticket-number=000 "
-                            + "--batch")
-        return run(sosreport_command)
-
-    @task
-    def get_command_task(remote_path, local_path, user='root', password='foobar'):
+    def get_file_task(remote_path, local_path, user='root', password='foobar'):
         env.user = user
         env.password = password
         env.parallel = True
         return get(remote_path, local_path)
 
-    def get_command_on_host(self, remote_path, local_path, host):
-        return execute(self.get_command_task, remote_path=remote_path,
+    def get_file_on_host(self, remote_path, local_path, host):
+        return execute(self.get_file_task, remote_path=remote_path,
                        local_path=local_path, host=host)[host]
-
-    def execute_sosreports_on_hosts(self, command, hosts, host=None):
-        return execute(self.sosreport_command_task, command=command, hosts=hosts)
 
     def run_command_on_hosts(self, command, hosts, host=None):
         return execute(self.run_command_task, command=command, hosts=hosts)
