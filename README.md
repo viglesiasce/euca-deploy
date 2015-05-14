@@ -39,8 +39,8 @@ Provisions the rest of the system or update the configuration of an existing sys
     euca-deploy provision -p <root-ssh-password-for-deployment-systems>
     
 ### Debug
-#### Not yet implemented!!!
-This step will grab all necessary information from a system in order to provide artifacts for use in debugging a problem.
+This step will grab all necessary information from a system in order to provide artifacts for use in debugging a problem.  In addition, this step will confirm/install sosreports and eucalyptus sosreports plugin on each node, run sosreports on each node, and copy the sosreport back to the local client.
     
+    euca-deploy debug -p <root-ssh-password-for-deployment-systems>
     
     
