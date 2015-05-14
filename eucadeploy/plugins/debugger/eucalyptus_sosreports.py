@@ -1,11 +1,12 @@
 import fabric
 from fabric.colors import white
 from fabric.decorators import task
-from fabric.operations import run
+from fabric.operations import run, local
 from fabric.state import env
 from fabric.tasks import execute
 from fabric.context_managers import hide
 import re
+from datetime import datetime
 from eucadeploy.plugins.debugger.debuggerplugin import DebuggerPlugin
 
 
@@ -56,6 +57,22 @@ class EucalyptusSosReports(DebuggerPlugin):
 
     def _grab_sosreports(self, all_hosts):
         """
+        Create local directory
+        for downloaded sosreports
+        """
+        timestamp = datetime.strftime(datetime.now(), '%Y%m%d-%H%M%S') 
+        directory = 'sosreport-' + timestamp
+        message = 'Creating directory ' + directory + " on localhost"
+        self.info(message)
+        with hide('everything'):
+            mkdir_output = self.create_localdir(directory)
+        if re.search('created', mkdir_output):
+            self.success('localhost: Directory ' + directory
+                         + ' created successfully')
+        else:
+            self.failure('localhost: Directory ' + directory
+                         + ' creation failed')
+        """
         Remove old sosreports are around in /tmp
         """
         with hide('everything'):
@@ -85,14 +102,13 @@ class EucalyptusSosReports(DebuggerPlugin):
                     self.success(host + ':sosreport finished - '
                                 + output)
                     remote_path = output.strip()
-                    local_path = remote_path.split('/')[2]
+                    local_file = remote_path.split('/')[2]
                     format_host = host.replace(".", "_")
+                    local_path = directory + "/" + format_host + "-" + local_file
                     with hide('everything'):
                         cp_output = self.get_file_on_host(remote_path,
-                                                             format_host
-                                                             + "-"
-                                                             + local_path,
-                                                             host=host)
+                                                          local_path,
+                                                          host=host)
                     if cp_output:
                         self.success(host + ':sosreport downloaded - '
                                     + local_path)
@@ -101,7 +117,19 @@ class EucalyptusSosReports(DebuggerPlugin):
                                     + local_path)
 
     @task
+    def create_localdir(directory):
+        """
+        Create local directory for downloaded sosreports.
+        Directory will be prepended with YYYYMMDD-HHMMSS time format
+        """
+        return local("mkdir -v " + directory, capture=True)
+
+    @task
     def sosreport_command_task(user='root', password='foobar'):
+        """
+        Execute sosreport on each host, passing hostname
+        and ticket number
+        """
         env.user = user
         env.password = password
         env.parallel = True
@@ -115,4 +143,8 @@ class EucalyptusSosReports(DebuggerPlugin):
         return run(sosreport_command)
 
     def execute_sosreports_on_hosts(self, hosts, host=None):
+        """
+        Run sosreport_command_task on each host
+        """
         return execute(self.sosreport_command_task, hosts=hosts)
+
