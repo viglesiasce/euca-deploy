@@ -44,7 +44,6 @@ This step will grab all necessary information from a system in order to provide 
 * Confirm/install sosreports and eucalyptus sosreports plugin on each node
 * Run sosreports on each node
 * Copy the sosreport back to the local client
-    
-   <code>euca-deploy debug -p <root-ssh-password-for-deployment-systems></code>
-    
+
+    euca-deploy debug -p <root-ssh-password-for-deployment-systems>
     
