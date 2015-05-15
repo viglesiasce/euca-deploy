@@ -7,33 +7,27 @@ class Storage(ValidatorPlugin):
             self.systemproperties = self.environment['default_attributes']['eucalyptus']['system-properties']
         for name in self.topology['clusters'].keys():
             if 'storage-backend' in self.topology['clusters'][name]:
-                if 'netapp' in self.topology['clusters'][name]['storage-backend']:
-                    storage_properties = [name + '.storage.chapuser', name + '.storage.ncpaths', name + '.storage.scpaths',
-                                    name + '.storage.sanhost', name + '.storage.sanpassword', name + '.storage.sanuser',
-                                    name + '.storage.vservername']
-                    for val in storage_properties:
-                        try:
-                           assert val in self.systemproperties
-                           self.success('Netapp system property ' + val + ' is valid.')
-                        except AssertionError, e:
-                           self.failure('Netapp system property ' + val + ' is missing or invalid')
-                if 'ceph-rbd' in self.topology['clusters'][name]['storage-backend']:
-                    storage_properties = [name + '.storage.cephconfigfile', name + '.storage.cephkeyringfile',
+                storage_options = ['netapp', 'ceph-rbd', 'threepar']
+                netapp_properties = [name + '.storage.chapuser', name + '.storage.ncpaths', name + '.storage.scpaths',
+                          name + '.storage.sanhost', name + '.storage.sanpassword', name + '.storage.sanuser',
+                          name + '.storage.vservername']
+                ceph_properties = [name + '.storage.cephconfigfile', name + '.storage.cephkeyringfile',
                                     name + '.storage.cephsnapshotpools', name + '.storage.cephuser',
                                     name + '.storage.cephvolumepools']
-                    for val in storage_properties:
-                        try:
-                           assert val in self.systemproperties
-                           self.success('Netapp system property ' + val + ' is valid.')
-                        except AssertionError, e:
-                           self.failure('Netapp system property ' + val + ' is missing or invalid')
-                if 'threepar' in self.topology['clusters'][name]['storage-backend']:
-                    storage_properties = [name + '.storage.chapuser', name + '.storage.ncpaths', name + '.storage.sanhost',
-                                    name + '.storage.sanuser', name + '.storage.sanpassword', name + '.storage.scpaths',
-                                    name + '.storage.threeparwsport', name + '.storage.usercpg', name + '.storage.copycpg']
-                    for val in storage_properties:
-                        try:
-                           assert val in self.systemproperties
-                           self.success('Netapp system property ' + val + ' is valid.')
-                        except AssertionError, e:
-                           self.failure('Netapp system property ' + val + ' is missing or invalid')
+                threepar_properties = [name + '.storage.chapuser', name + '.storage.ncpaths', name + '.storage.sanhost',
+                                       name + '.storage.sanuser', name + '.storage.sanpassword', name + '.storage.scpaths',
+                                       name + '.storage.threeparwsport', name + '.storage.usercpg', name + '.storage.copycpg']
+                for val1 in storage_options:
+                    if val1 in self.topology['clusters'][name]['storage-backend']:
+                        if val1 == "netapp":
+                            storage_properties = netapp_properties
+                        if val1 == "ceph-rbd":
+                            storage_properties = ceph_properties
+                        if val1 == "threepar":
+                            storage_properties = threepar_properties
+                        for val2 in storage_properties:
+                           try:
+                              assert val2 in self.systemproperties
+                              self.success(val1 + ' system property ' + val2 + ' is valid.')
+                           except AssertionError, e:
+                              self.failure(val1 + ' system property ' + val2 + ' is missing or invalid')
