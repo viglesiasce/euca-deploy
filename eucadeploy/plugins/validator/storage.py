@@ -9,11 +9,11 @@ class Storage(ValidatorPlugin):
             if 'storage-backend' in self.topology['clusters'][name]:
                 storage_options = ['netapp', 'ceph-rbd', 'threepar']
                 netapp_properties = [name + '.storage.chapuser', name + '.storage.ncpaths', name + '.storage.scpaths',
-                          name + '.storage.sanhost', name + '.storage.sanpassword', name + '.storage.sanuser',
-                          name + '.storage.vservername']
+                                     name + '.storage.sanhost', name + '.storage.sanpassword', name + '.storage.sanuser',
+                                     name + '.storage.vservername']
                 ceph_properties = [name + '.storage.cephconfigfile', name + '.storage.cephkeyringfile',
-                                    name + '.storage.cephsnapshotpools', name + '.storage.cephuser',
-                                    name + '.storage.cephvolumepools']
+                                   name + '.storage.cephsnapshotpools', name + '.storage.cephuser',
+                                   name + '.storage.cephvolumepools']
                 threepar_properties = [name + '.storage.chapuser', name + '.storage.ncpaths', name + '.storage.sanhost',
                                        name + '.storage.sanuser', name + '.storage.sanpassword', name + '.storage.scpaths',
                                        name + '.storage.threeparwsport', name + '.storage.usercpg', name + '.storage.copycpg']
