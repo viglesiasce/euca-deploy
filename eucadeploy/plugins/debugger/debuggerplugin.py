@@ -87,7 +87,8 @@ class DebuggerPlugin(object):
         env.user = user
         env.password = password
         env.parallel = True
-        return get(remote_path, local_path)
+        with settings(warn_only=True):
+            return get(remote_path, local_path)
 
     def get_file_on_host(self, remote_path, local_path, host):
         """
