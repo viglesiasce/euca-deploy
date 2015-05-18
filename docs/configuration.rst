@@ -1,15 +1,15 @@
-euca-deploy Configuration File
-******************************
+Calyptos Configuration File
+***************************
 
 .. contents:: :local:
 
-euca-deploy configuration files are written in `YAML syntax <http://en.wikipedia.org/wiki/YAML/>`_.
+Calyptos configuration files are written in `YAML syntax <http://en.wikipedia.org/wiki/YAML/>`_.
 Below is a guide on what can be provided and how to structure your configuration files.
 
 The a typical config file has the following structure::
 
-    name: Name of your deployment (ie HadEupa)
-    description: Description of your Euca deployment (ie "This Euca install will run our Hadoop workloads!")
+    name: HadEupa
+    description: This Euca install will run our Hadoop workloads!
     default_attributes:
       eucalyptus:
         topology:
