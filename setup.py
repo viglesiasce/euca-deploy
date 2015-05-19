@@ -11,7 +11,7 @@ with open('README.md') as f:
     long_description = f.read()
 
 setup(
-    name='Euca Deploy',
+    name='euca-deploy',
     version=get_version(),
     description='Tool for installing Eucalyptus',
     long_description=long_description,
