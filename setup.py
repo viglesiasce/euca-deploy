@@ -1,10 +1,73 @@
 #!/usr/bin/env python
 
-from __future__ import with_statement
+from distutils.command.build_py import build_py
+from distutils.command.sdist import sdist
+import os.path
+import subprocess
 
 from setuptools import setup, find_packages
 
-from eucadeploy.version import get_version
+
+__version__ = '0.1'
+
+
+# Check if this is a git repo; maybe we can get more precise version info
+try:
+    REPO_PATH = "."
+    # noinspection PyUnresolvedReferences
+    GIT = subprocess.Popen(
+        # TODO: mbacchi change this to "git describe --tag" when first git tag has been defined 
+        ['git', 'describe', '--always'], stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        env={'GIT_DIR': os.path.join(REPO_PATH, '.git')})
+    GIT.wait()
+    GIT.stderr.read()
+    if GIT.returncode == 0:
+        __version__ = GIT.stdout.read().strip().lstrip('v')
+        if type(__version__).__name__ == 'bytes':
+            __version__ = __version__.decode()
+except:
+    # Not really a bad thing; we'll just use what we had
+    pass
+
+class build_py_with_git_version(build_py):
+    '''Like build_py, but also hardcoding the version in __init__.__version__
+       so it's consistent even outside of the source tree'''
+
+    def build_module(self, module, module_file, package):
+        orig_outfile, _ = build_py.build_module(self, module, module_file,
+                                                package)
+        version_line = "__version__ = '{0}'\n".format(__version__)
+        new_outfile = orig_outfile + '.new'
+        with open(new_outfile, 'w') as new_fh:
+            with open(orig_outfile) as orig_fh:
+                for line in orig_fh:
+                    if line.startswith('__version__ ='):
+                        new_fh.write(version_line)
+                    else:
+                        new_fh.write(line)
+            new_fh.flush()
+        os.rename(new_outfile, orig_outfile)
+
+
+class sdist_with_git_version(sdist):
+    '''Like sdist, but also hardcoding the version in __init__.__version__ so
+       it's consistent even outside of the source tree'''
+
+    def make_release_tree(self, base_dir, files):
+        sdist.make_release_tree(self, base_dir, files)
+        version_line = "__version__ = '{0}'\n".format(__version__)
+        orig_setup = os.path.join(base_dir, 'setup.py')
+        new_setup = orig_setup + '.new'
+        with open(new_setup, 'w') as new_fh:
+            with open(orig_setup) as orig_fh:
+                for line in orig_fh:
+                    if line.startswith('__version__ ='):
+                        new_fh.write(version_line)
+                    else:
+                        new_fh.write(line)
+            new_fh.flush()
+        os.rename(new_setup, orig_setup)
 
 
 with open('README.md') as f:
@@ -12,7 +75,7 @@ with open('README.md') as f:
 
 setup(
     name='euca-deploy',
-    version=get_version(),
+    version=__version__,
     description='Tool for installing Eucalyptus',
     long_description=long_description,
     author='Vic Iglesias',
@@ -38,4 +101,8 @@ setup(
         'Topic :: System :: Clustering',
         'Topic :: System :: Systems Administration',
     ],
+    cmdclass={
+        'build_py': build_py_with_git_version,
+        'sdist': sdist_with_git_version
+    },
 )

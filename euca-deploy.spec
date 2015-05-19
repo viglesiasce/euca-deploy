@@ -1,7 +1,7 @@
 %define name euca-deploy
-%define version 0.1a
-%define unmangled_version 0.1a
-%define unmangled_version 0.1a
+%define version 0.1
+%define unmangled_version 0.1
+%define unmangled_version 0.1
 %define release 1
 
 Summary: Tool for installing Eucalyptus
@@ -17,11 +17,7 @@ BuildArch: noarch
 Vendor: Vic Iglesias <viglesiasce@gmail.com>
 Url: https://github.com/viglesiasce/euca-deploy/
 
-Requires: PyYaml
-Requires: python-devel
-Requires: python-setuptools
-Requires: gcc
-Requires: git
+Requires: fabric PyYaml
 
 %description
 # Euca Deploy
