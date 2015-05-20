@@ -17,6 +17,9 @@ BuildArch: noarch
 Vendor: Vic Iglesias <viglesiasce@gmail.com>
 Url: https://github.com/viglesiasce/euca-deploy/
 
+BuildRequires: python2-devel
+BuildRequires: python-setuptools
+
 Requires: fabric PyYaml
 
 %description
