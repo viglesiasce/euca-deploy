@@ -27,7 +27,7 @@ Validating your configuration
 +++++++++++++++++++++++++++++
 Once you have a config file that describes the Eucalyptus cloud that you intend on deploying, it is best practice to
 run the Calyptos validators to make sure that there are no syntactical or semantic mistakes. The validators are intended
-to provide feedback based on known misconfigurations that the tool believes will result in either a sub-optimal
+to provide feedback based on known mis-configurations that the tool believes will result in either a sub-optimal
 or broken deployment. Any failures in this step will not block the continuation of the deployment.
 
 .. code-block:: console

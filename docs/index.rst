@@ -19,6 +19,10 @@ phases of their Eucalyptus deployments:
 * Debugging
 * Backup/Restore (Not yet implemented)
 
+Each of the phases is implemented as plugins using the `stevedore library <http://docs.openstack.org/developer/stevedore/>`_.
+This allows new validators, deployers and debuggers to be implemented with modularity in mind. For more information on
+how to create your own plugins head over to the :doc:`plugin documentation <plugins>`.
+
 Currently Calyptos supports deploying the following:
 
 * Object Storage Backends
@@ -50,6 +54,7 @@ Contents
 
    quick-start
    configuration
+   plugins
 
 Indices and tables
 ==================
