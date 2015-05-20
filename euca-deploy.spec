@@ -69,7 +69,7 @@ This step will grab all necessary information from a system in order to provide 
 
 
 %prep
-%setup -n %{name}-%{unmangled_version} -n %{name}-%{unmangled_version}
+%setup -q -n %{tarball_basedir}
 
 %build
 python setup.py build
