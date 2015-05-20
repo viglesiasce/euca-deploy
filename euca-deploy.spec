@@ -20,7 +20,7 @@ Url: https://github.com/viglesiasce/euca-deploy/
 BuildRequires: python2-devel
 BuildRequires: python-setuptools
 
-Requires: fabric PyYaml
+Requires: fabric PyYAML
 
 %description
 # Euca Deploy
