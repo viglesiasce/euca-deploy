@@ -1,3 +1,6 @@
+%{!?__python2: %global __python2 /usr/bin/python2}
+%{!?python2_sitelib: %global python2_sitelib %(%{__python2} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
+
 %define name euca-deploy
 %define version 0.1
 %define unmangled_version 0.1
@@ -20,7 +23,7 @@ Url: https://github.com/viglesiasce/euca-deploy/
 BuildRequires: python2-devel
 BuildRequires: python-setuptools
 
-Requires: fabric PyYAML
+Requires: fabric PyYAML git python-stevedore
 
 %description
 # Euca Deploy
@@ -75,13 +78,17 @@ This step will grab all necessary information from a system in order to provide 
 %setup -q -n %{tarball_basedir}
 
 %build
-python setup.py build
+%{__python2} setup.py build
 
 %install
-python setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
+%{__python2} setup.py install --skip-build --root=$RPM_BUILD_ROOT
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%files -f INSTALLED_FILES
+%files
 %defattr(-,root,root)
+/usr/bin/euca-deploy
+%{python_sitelib}/eucadeploy/*
+%{python_sitelib}/*.egg-info
+%config /etc/config.yml
