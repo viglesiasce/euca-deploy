@@ -51,7 +51,7 @@ setup(
             'repos = eucadeploy.plugins.validator.'
             'repos:Repos',
             'storage = eucadeploy.plugins.validator.'
-            'storage:Storage'
+            'storage:Storage',
             'structure = eucadeploy.plugins.validator.'
             'structure:Structure'
         ],
