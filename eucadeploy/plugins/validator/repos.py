@@ -19,4 +19,4 @@ class Repos(ValidatorPlugin):
                 if hasattr(e, 'reason'):
                     raise AssertionError("INVALID URL: " + str(url) + "  " + str(e.reason))
                 elif hasattr(e, 'code'):
-                    raise AssertionError("INVALID REQUEST: " + str(url) + "  " + str(e.reason))
+                    raise AssertionError("INVALID REQUEST: " + str(url) + "  " + str(e.code))

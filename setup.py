@@ -52,6 +52,8 @@ setup(
             'repos:Repos',
             'storage = eucadeploy.plugins.validator.'
             'storage:Storage'
+            'structure = eucadeploy.plugins.validator.'
+            'structure:Structure'
         ],
         'eucadeploy.debugger': [
             'check_ports = eucadeploy.plugins.debugger.'
