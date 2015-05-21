@@ -9,8 +9,10 @@ class Structure(ValidatorPlugin):
             {
                 'description': And(str, error="Invalid environment.yml value(s) for 'description'."),
                 'name': And(str, error="Invalid environment.yml value(s) for 'name'."),
-                Optional('cookbook_versions'): dict,
-                Optional('override_attributes'): dict,
+                Optional('cookbook_versions'):
+                    And(dict, error="Invalid environment.yml value(s) for 'cookbook_versions'."),
+                Optional('override_attributes'):
+                    And(dict, error="Invalid environment.yml value(s) for 'override_attributes'."),
                 'default_attributes':
                     {
                         'eucalyptus':
