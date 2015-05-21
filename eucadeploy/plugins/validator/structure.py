@@ -1,6 +1,5 @@
 from eucadeploy.plugins.validator.validatorplugin import ValidatorPlugin
 from schema import Schema, And, Or, Use, Optional
-import yaml
 
 class Structure(ValidatorPlugin):
     def validate(self):
@@ -27,7 +26,9 @@ class Structure(ValidatorPlugin):
                                                 Optional('Clusters'):
                                                     And(list, error="Invalid environment.yml value(s) for 'Clusters'."),
                                                 Optional('InstanceDnsServers'):
-                                                    And(list, error="Invalid environment.yml value(s) for 'PublicIps'."),
+                                                    And(list, error="Invalid environment.yml value(s) for 'InstanceDnsServers'."),
+                                                Optional('Mode'):
+                                                    And(str, error="Invalid environment.yml value(s) for 'Mode'."),
                                             },
                                         'bridge-interface':
                                             And(str, error="Invalid environment.yml value(s) for 'bridge-interface'."),
