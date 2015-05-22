@@ -1,78 +1,48 @@
+--- 
+name: scale-system
+description: 4.1 EDGE Testing
 default_attributes:
   eucalyptus:
-    default-img-url: http://images.walrus.cloud.qa1.eucalyptus-systems.com:8773/precise-server-cloudimg-amd64-disk1.img
-    enterprise-repo: http://packages.release.eucalyptus-systems.com/yum/tags/enterprise-4.1/centos/6/x86_64/
-    euca2ools-repo: http://packages.release.eucalyptus-systems.com/yum/tags/euca2ools-3.2/centos/6/x86_64/
-    eucalyptus-repo: http://packages.release.eucalyptus-systems.com/yum/tags/eucalyptus-4.1/centos/6/x86_64/
-    init-script-url: http://git.qa1.eucalyptus-systems.com/qa-repos/eucalele/raw/master/deploy-helpers/scripts/network-interfaces.sh
-    install-imaging-worker: 'true'
-    install-load-balancer: 'true'
-    install-type: packages
-    log-level: DEBUG
-    nc:
-      max-cores: 32
-    network:
-      bridge-interface: br0
-      bridged-nic: em1
-      config-json:
-        Clusters:
-        - Name: one
-          PrivateIps:
-            - 10.111.52.151-10.111.52.200
-          Subnet:
-            Name: one
-            Subnet: 10.111.0.0
-            Netmask: 255.255.0.0
-            Gateway: 10.111.0.1
-        - Name: two
-          PrivateIps:
-            - 10.111.52.151-10.111.52.200
-          Subnet:
-            Name: two
-            Subnet: 10.111.0.0
-            Netmask: 255.255.0.0
-            Gateway: 10.111.0.1
-        InstanceDnsServers:
-        - 10.111.5.1
-        PublicIps:
-          - 10.111.52.100-10.111.52.150
-      mode: EDGE
-      nc-router: N
-      private-interface: br0
-      public-interface: br0
-    source-branch: maint-4.1
-    source-repo: ssh://repo-euca@git.eucalyptus-systems.com/internal
-    system-properties:
-      cloudformation.url_domain_whitelist: '*s3.amazonaws.com,*qa1.eucalyptus-systems.com'
-      two.storage.chapuser: euca-one
-      two.storage.ncpaths: 10.107.1.1
-      two.storage.sanhost: 10.109.1.26
-      two.storage.sanpassword: test
-      two.storage.sanuser: test
-      two.storage.scpaths: 10.107.1.1
-      two.storage.vservername: euca-vserver
-      one.storage.cephconfigfile: test
-      one.storage.cephkeyringfile: test
-      one.storage.cephsnapshotpools: test
-      one.storage.cephuser: test
-      one.storage.cephvolumepools: test
+    default-img-url: "http://images.walrus.cloud.qa1.eucalyptus-systems.com:8773/precise-server-cloudimg-amd64-disk1.img"
+    enterprise-repo: "http://packages.release.eucalyptus-systems.com/yum/tags/enterprise-4.1/centos/6/x86_64/"
+    euca2ools-repo: "http://packages.release.eucalyptus-systems.com/yum/tags/euca2ools-3.2/centos/6/x86_64/"
+    eucalyptus-repo: "http://packages.release.eucalyptus-systems.com/yum/tags/eucalyptus-4.1/centos/6/x86_64/"
+    init-script-url: "http://git.qa1.eucalyptus-systems.com/qa-repos/eucalele/raw/master/deploy-helpers/scripts/network-interfaces.sh"
+    post-script-url: "https://raw.githubusercontent.com/ccassler/myrepo/master/scripts/post_install_config.bash"
     topology:
-      clc-1: 10.111.5.1
+      clc-1: 172.18.1.151
+      walrus: 172.18.1.151
+      user-facing:
+      - 172.18.1.151
       clusters:
         one:
-          cc-1: 10.111.5.5
-          nodes: 10.111.5.6 10.111.5.7
-          sc-1: 10.111.5.5
-          storage-backend: ceph-rbd
+          cc-1: 172.18.1.151
+          sc-1: 172.18.1.151
+          storage-backend: das
           das-device: vg01
-        two:
-          cc-1: 10.111.5.23
-          nodes: 10.111.1.72 10.111.5.14
-          sc-1: 10.111.5.23
-          storage-backend: netapp
-      user-facing:
-      - 10.111.5.1
-      walrus: 10.111.5.1
-    yum-options: --nogpg
-description: Eucalyptus Shared Setup Testing
-name: shared-setup-1
+          nodes: 172.18.1.152
+    nc:
+      max-cores: 32
+      cache-size: 11000
+      work-size: 160000
+    network:
+      mode: EDGE
+      config-json:
+        InstanceDnsServers:
+        - 10.1.1.254
+        PublicIps:
+        - 172.18.1.200-172.18.1.210
+        Clusters:
+        - Name: one
+          Subnet:
+            Subnet: 172.18.1.0
+            Netmask: 255.255.255.0
+            Name: 172.18.1.0
+            Gateway: 172.18.1.1
+      public-interface: br0
+      private-interface: br0
+      bridge-interface: br0
+      bridged-nic: eth0
+    yum-options: "--nogpg"
+override_attributes: {}
+cookbook_versions: {}
