@@ -48,6 +48,20 @@ class Structure(ValidatorPlugin):
                                         'walrus': And(str, error="Invalid environment.yml value(s) for 'walrus'."),
                                         'user-facing':
                                             And(list, error="Invalid environment.yml value(s) for 'user-facing'."),
+                                        Optional('riakcs'): {
+                                            'access-key':
+                                                And(str, error="Invalid environment.yml value(s) for 'access-key'."),
+                                            'admin-email':
+                                                And(str, error="Invalid environment.yml value(s) for 'access-email'."),
+                                            'admin-name':
+                                                And(str, error="Invalid environment.yml value(s) for 'access-name'."),
+                                            'endpoint':
+                                                And(str, error="Invalid environment.yml value(s) for 'endpoint'."),
+                                            'port':
+                                                And(int, error="Invalid environment.yml value(s) for 'port'."),
+                                            'secret-key':
+                                                And(str, error="Invalid environment.yml value(s) for 'secret-key'."),
+                                        }
                                     },
                                 'eucalyptus-repo':
                                     And(str, error="Invalid environment.yml value(s) for 'eucalyptus-repo'."),
