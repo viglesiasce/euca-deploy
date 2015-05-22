@@ -108,6 +108,6 @@ setup(
         'build_py': build_py_with_git_version,
         'sdist': sdist_with_git_version
     },
-    data_files=[('/etc/', ['etc/config.yml']),
+    data_files=[('/etc/euca-deploy/', ['etc/config.yml']),
 	('/usr/share/euca-deploy/examples/', example_items)],
 )
