@@ -1,48 +1,46 @@
---- 
+
+---
 name: scale-system
 description: 4.1 EDGE Testing
 default_attributes:
   eucalyptus:
-    default-img-url: "http://images.walrus.cloud.qa1.eucalyptus-systems.com:8773/precise-server-cloudimg-amd64-disk1.img"
-    enterprise-repo: "http://packages.release.eucalyptus-systems.com/yum/tags/enterprise-4.1/centos/6/x86_64/"
-    euca2ools-repo: "http://packages.release.eucalyptus-systems.com/yum/tags/euca2ools-3.2/centos/6/x86_64/"
-    eucalyptus-repo: "http://packages.release.eucalyptus-systems.com/yum/tags/eucalyptus-4.1/centos/6/x86_64/"
-    init-script-url: "http://git.qa1.eucalyptus-systems.com/qa-repos/eucalele/raw/master/deploy-helpers/scripts/network-interfaces.sh"
-    post-script-url: "https://raw.githubusercontent.com/ccassler/myrepo/master/scripts/post_install_config.bash"
     topology:
-      clc-1: 172.18.1.151
-      walrus: 172.18.1.151
+      clc-1: 10.113.10.1
+      walrus: 10.113.10.2
       user-facing:
-      - 172.18.1.151
+      - 10.113.10.3
       clusters:
         one:
-          cc-1: 172.18.1.151
-          sc-1: 172.18.1.151
+          cc-1: 10.113.10.4
+          sc-1: 10.113.10.5
           storage-backend: das
           das-device: vg01
-          nodes: 172.18.1.152
+          nodes: 10.113.10.6
     nc:
-      max-cores: 32
+      max-cores: 128
       cache-size: 11000
       work-size: 160000
     network:
       mode: EDGE
       config-json:
         InstanceDnsServers:
-        - 10.1.1.254
+        - 10.113.10.1
         PublicIps:
-        - 172.18.1.200-172.18.1.210
+        - 10.113.150.1-10.113.150.254
         Clusters:
         - Name: one
           Subnet:
-            Subnet: 172.18.1.0
+            Subnet: 172.32.192.0
             Netmask: 255.255.255.0
-            Name: 172.18.1.0
-            Gateway: 172.18.1.1
+            Name: 172.32.192.0
+            Gateway: 172.32.192.1
       public-interface: br0
       private-interface: br0
       bridge-interface: br0
-      bridged-nic: eth0
+      bridged-nic: em1
+    init-script-url: http://git.qa1.eucalyptus-systems.com/qa-repos/eucalele/raw/master/scripts/network-interfaces.sh
+    eucalyptus-repo: http://packages.release.eucalyptus-systems.com/yum/tags/eucalyptus-devel/centos/6/x86_64/
+    euca2ools-repo: http://packages.release.eucalyptus-systems.com/yum/tags/euca2ools-devel/centos/6/x86_64/
     yum-options: "--nogpg"
 override_attributes: {}
 cookbook_versions: {}
