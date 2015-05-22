@@ -19,7 +19,7 @@ class Structure(ValidatorPlugin):
                                 'network':
                                     {
                                         'mode': And(str, error="Invalid environment.yml value(s) for 'mode'."),
-                                        'config-json':
+                                        Optional('config-json'):
                                             {
                                                 'PublicIps':
                                                     And(list, error="Invalid environment.yml value(s) for 'PublicIps'."),
