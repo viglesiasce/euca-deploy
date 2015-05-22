@@ -92,3 +92,4 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/eucadeploy/*
 %{python_sitelib}/*.egg-info
 %config /etc/config.yml
+/usr/share/euca-deploy/examples/*

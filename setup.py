@@ -4,6 +4,7 @@ from distutils.command.build_py import build_py
 from distutils.command.sdist import sdist
 import os.path
 import subprocess
+import glob
 
 from setuptools import setup, find_packages
 
@@ -73,6 +74,8 @@ class sdist_with_git_version(sdist):
 with open('README.md') as f:
     long_description = f.read()
 
+example_items = glob.glob('examples/*')
+
 setup(
     name='euca-deploy',
     version=__version__,
@@ -105,5 +108,6 @@ setup(
         'build_py': build_py_with_git_version,
         'sdist': sdist_with_git_version
     },
-    data_files=[('/etc/', ['etc/config.yml'])],
+    data_files=[('/etc/', ['etc/config.yml']),
+	('/usr/share/euca-deploy/examples/', example_items)],
 )
