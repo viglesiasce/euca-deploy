@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# euca-deploy documentation build configuration file, created by
+# calyptos documentation build configuration file, created by
 # sphinx-quickstart on Mon May 11 15:52:37 2015.
 #
 # This file is execfile()d with the current directory set to its
@@ -50,7 +50,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'euca-deploy'
+project = u'calyptos'
 copyright = u'2015, Eucalyptus Quality Team'
 author = u'Eucalyptus Quality Team'
 
@@ -226,7 +226,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  (master_doc, 'euca-deploy.tex', u'euca-deploy Documentation',
+  (master_doc, 'calyptos.tex', u'calyptos Documentation',
    u'Eucalyptus Quality Team', 'manual'),
 ]
 
@@ -256,7 +256,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'euca-deploy', u'euca-deploy Documentation',
+    (master_doc, 'calyptos', u'calyptos Documentation',
      [author], 1)
 ]
 
@@ -270,8 +270,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  (master_doc, 'euca-deploy', u'euca-deploy Documentation',
-   author, 'euca-deploy', 'One line description of project.',
+  (master_doc, 'calyptos', u'calyptos Documentation',
+   author, 'calyptos', 'One line description of project.',
    'Miscellaneous'),
 ]
 

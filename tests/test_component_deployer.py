@@ -1,4 +1,4 @@
-from eucadeploy.componentdeployer import ComponentDeployer
+from calyptos.componentdeployer import ComponentDeployer
 
 
 def test_constructor():

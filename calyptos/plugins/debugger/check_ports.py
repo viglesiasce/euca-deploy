@@ -1,6 +1,6 @@
 from fabric.context_managers import hide
 import re
-from eucadeploy.plugins.debugger.debuggerplugin import DebuggerPlugin
+from calyptos.plugins.debugger.debuggerplugin import DebuggerPlugin
 
 class CheckPorts(DebuggerPlugin):
     def debug(self):

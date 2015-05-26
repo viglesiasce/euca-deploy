@@ -4,9 +4,9 @@ import yaml
 from deployerplugin import DeployerPlugin
 from fabric.context_managers import hide
 from fabric.tasks import execute
-from eucadeploy.chefmanager import ChefManager
+from calyptos.chefmanager import ChefManager
 import os
-from eucadeploy.componentdeployer import ComponentDeployer
+from calyptos.componentdeployer import ComponentDeployer
 
 
 class Chef(DeployerPlugin):

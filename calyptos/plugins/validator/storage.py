@@ -1,4 +1,4 @@
-from eucadeploy.plugins.validator.validatorplugin import ValidatorPlugin
+from calyptos.plugins.validator.validatorplugin import ValidatorPlugin
 
 class Storage(ValidatorPlugin):
     def validate(self):

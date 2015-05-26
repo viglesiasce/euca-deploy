@@ -1,6 +1,6 @@
 from fabric.context_managers import hide, show
 import re
-from eucadeploy.plugins.debugger.debuggerplugin import DebuggerPlugin
+from calyptos.plugins.debugger.debuggerplugin import DebuggerPlugin
 
 
 class FilePermissions(DebuggerPlugin):

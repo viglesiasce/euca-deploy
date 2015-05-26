@@ -77,18 +77,18 @@ with open('README.md') as f:
 example_items = glob.glob('examples/*')
 
 setup(
-    name='euca-deploy',
+    name='calyptos',
     version=__version__,
     description='Tool for installing Eucalyptus',
     long_description=long_description,
     author='Vic Iglesias',
     author_email='viglesiasce@gmail.com',
-    url='https://github.com/viglesiasce/euca-deploy/',
+    url='https://github.com/eucalyptus/calyptos/',
     packages=find_packages(),
     test_suite='nose.collector',
     tests_require=['nose'],
     install_requires=['fabric', 'PyYaml', 'argparse', 'stevedore', 'sphinx'],
-    scripts=['bin/euca-deploy'],
+    scripts=['bin/calyptos'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
@@ -105,34 +105,34 @@ setup(
         'Topic :: System :: Systems Administration',
     ],
     entry_points={
-        'eucadeploy.deployer': [
-            'chef = eucadeploy.plugins.deployer.'
+        'calyptos.deployer': [
+            'chef = calyptos.plugins.deployer.'
             'chef:Chef'
         ],
-        'eucadeploy.validator': [
-            'pinghosts = eucadeploy.plugins.validator.'
+        'calyptos.validator': [
+            'pinghosts = calyptos.plugins.validator.'
             'pinghosts:PingHosts',
-            'topology = eucadeploy.plugins.validator.'
+            'topology = calyptos.plugins.validator.'
             'topology:Topology',
-            'repos = eucadeploy.plugins.validator.'
+            'repos = calyptos.plugins.validator.'
             'repos:Repos',
-            'storage = eucadeploy.plugins.validator.'
+            'storage = calyptos.plugins.validator.'
             'storage:Storage',
-            'structure = eucadeploy.plugins.validator.'
+            'structure = calyptos.plugins.validator.'
             'structure:Structure'
         ],
-        'eucadeploy.debugger': [
-            'check_ports = eucadeploy.plugins.debugger.'
+        'calyptos.debugger': [
+            'check_ports = calyptos.plugins.debugger.'
             'check_ports:CheckPorts',
-            'debug_cloud_controller = eucadeploy.plugins.debugger.'
+            'debug_cloud_controller = calyptos.plugins.debugger.'
             'debug_cloud_controller:DebugCloudController',
-            'debug_node_controller = eucadeploy.plugins.debugger.'
+            'debug_node_controller = calyptos.plugins.debugger.'
             'debug_node_controller:DebugNodeController',
-            'debug_cluster_controller = eucadeploy.plugins.debugger.'
+            'debug_cluster_controller = calyptos.plugins.debugger.'
             'debug_cluster_controller:DebugClusterController',
-            'file_permissions = eucadeploy.plugins.debugger.'
+            'file_permissions = calyptos.plugins.debugger.'
             'file_permissions:FilePermissions',
-            'eucalyptus_sosreports = eucadeploy.plugins.debugger.'
+            'eucalyptus_sosreports = calyptos.plugins.debugger.'
             'eucalyptus_sosreports:EucalyptusSosReports'
         ]
     },
@@ -140,6 +140,6 @@ setup(
         'build_py': build_py_with_git_version,
         'sdist': sdist_with_git_version
     },
-    data_files=[('/etc/euca-deploy/', ['etc/config.yml']),
-	('/usr/share/euca-deploy/examples/', example_items)],
+    data_files=[('/etc/calyptos/', ['etc/config.yml']),
+	('/usr/share/calyptos/examples/', example_items)],
 )

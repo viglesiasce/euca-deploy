@@ -1,13 +1,13 @@
 %{!?__python2: %global __python2 /usr/bin/python2}
 %{!?python2_sitelib: %global python2_sitelib %(%{__python2} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
 
-%define name euca-deploy
+%define name calyptos
 %define version 0.1
 %define unmangled_version 0.1
 %define unmangled_version 0.1
 %define release 1
 
-Summary: Tool for installing Eucalyptus
+Summary: Tool for managing Eucalyptus
 Name: %{name}
 Version: %{version}
 Release: %{release}
@@ -18,7 +18,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-buildroot
 Prefix: %{_prefix}
 BuildArch: noarch
 Vendor: Vic Iglesias <viglesiasce@gmail.com>
-Url: https://github.com/viglesiasce/euca-deploy/
+Url: https://github.com/eucalyptus/calyptos/
 
 BuildRequires: python2-devel
 BuildRequires: python-setuptools
@@ -26,9 +26,9 @@ BuildRequires: python-setuptools
 Requires: fabric PyYAML git python-stevedore
 
 %description
-# Euca Deploy
+# Calyptos
 
-This is a harness for running the Eucalyptus cookbook against a distributed system of nodes without a dependency on a Chef Server. We are using fabric and chef-zero to emulate the functionality of a chef-server. 
+This is a tool for managing your Eucalyptus deployments
 
 ## Install
 
@@ -37,8 +37,8 @@ This is a harness for running the Eucalyptus cookbook against a distributed syst
     yum install -y python-devel gcc git python-setuptools
     easy_install fabric PyYAML
     curl -L https://www.opscode.com/chef/install.sh | sudo bash -s -- -P chefdk
-    git clone https://github.com/viglesiasce/euca-deploy
-    cd euca-deploy
+    git clone https://github.com/eucalyptus/calyptos
+    cd calyptos
     python setup.py install
     
 ## Lifecycle Actions
@@ -54,17 +54,17 @@ In this stage we run validations against the configuration file to ensure that t
 ### Prepare
 This step ensures that Chef is installed on all servers and that we can SSH to all of them. It is nice to know that we are on good footing before we get going with the deployment.
 
-    euca-deploy prepare -p <root-ssh-password-for-deployment-systems>
+    calyptos prepare -p <root-ssh-password-for-deployment-systems>
 
 ### Bootstrap
 This step deploys the CLC and initializes the database. Here we are getting a bit deeper and if complete, we can assume that we've are on good footing to continue deploying the rest of the cloud.
 
-    euca-deploy bootstrap -p <root-ssh-password-for-deployment-systems>
+    calyptos bootstrap -p <root-ssh-password-for-deployment-systems>
   
 ### Provision
 Provisions the rest of the system or update the configuration of an existing system. If you change anything in your environment.yml, you can use this to push that change out to your cloud.
 
-    euca-deploy provision -p <root-ssh-password-for-deployment-systems>
+    calyptos provision -p <root-ssh-password-for-deployment-systems>
     
 ### Debug
 #### Not yet implemented!!!
@@ -88,8 +88,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-/usr/bin/euca-deploy
+/usr/bin/calyptos
 %{python_sitelib}/eucadeploy/*
 %{python_sitelib}/*.egg-info
-%config /etc/euca-deploy/config.yml
-/usr/share/euca-deploy/examples/*
+%config /etc/calyptos/config.yml
+/usr/share/calyptos/examples/*

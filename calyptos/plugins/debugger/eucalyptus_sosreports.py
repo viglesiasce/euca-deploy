@@ -7,7 +7,7 @@ from fabric.tasks import execute
 from fabric.context_managers import hide
 import re
 from datetime import datetime
-from eucadeploy.plugins.debugger.debuggerplugin import DebuggerPlugin
+from calyptos.plugins.debugger.debuggerplugin import DebuggerPlugin
 
 
 

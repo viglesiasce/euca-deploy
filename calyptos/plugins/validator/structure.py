@@ -1,4 +1,4 @@
-from eucadeploy.plugins.validator.validatorplugin import ValidatorPlugin
+from calyptos.plugins.validator.validatorplugin import ValidatorPlugin
 from schema import Schema, And, Or, Use, Optional
 
 class Structure(ValidatorPlugin):

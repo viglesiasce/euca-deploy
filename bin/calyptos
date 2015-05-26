@@ -2,7 +2,7 @@
 import argparse
 from fabric.colors import yellow
 from stevedore import driver, extension
-from eucadeploy.componentdeployer import ComponentDeployer
+from calyptos.componentdeployer import ComponentDeployer
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -26,7 +26,7 @@ if __name__ == '__main__':
     component_deployer = ComponentDeployer(args.environment)
     if args.operation == 'validate':
         mgr = extension.ExtensionManager(
-            namespace='eucadeploy.validator',
+            namespace='calyptos.validator',
             invoke_args=(component_deployer,),
             invoke_on_load=True,
             propagate_map_exceptions=True
@@ -34,7 +34,7 @@ if __name__ == '__main__':
         results = mgr.map_method(args.operation)
     elif args.operation == 'debug':
         mgr = extension.ExtensionManager(
-            namespace='eucadeploy.debugger',
+            namespace='calyptos.debugger',
             invoke_args=(component_deployer,),
             invoke_on_load=True,
             propagate_map_exceptions=False
@@ -50,7 +50,7 @@ if __name__ == '__main__':
         exit(total_failures)
     else:
         mgr = driver.DriverManager(
-            namespace='eucadeploy.deployer',
+            namespace='calyptos.deployer',
             name=args.driver,
             invoke_on_load=True,
             invoke_args=(args.password,
